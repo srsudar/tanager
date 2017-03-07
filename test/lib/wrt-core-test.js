@@ -1,5 +1,6 @@
 'use strict';
 
+var path = require('path');
 var proxyquire = require('proxyquire');
 var sinon = require('sinon');
 var tape = require('tape');
@@ -30,6 +31,36 @@ function end(t) {
   t.end();
   reset();
 }
+
+tape('getEntryPath correct when given title', function(t) {
+  var notebook = { path: '/path/to/notebook' };
+  // TODO: These tests are machine-dependent when it comes to time zone. Going
+  // to let this slide for now, but should be fixed.
+  var date = new Date('2016-03-05T20:00:00.000Z');
+  var words = ['meeting', 'with', 'vip'];
+  
+  var expected = path.join(
+    notebook.path, '2016', '2016-03-05_meeting-with-vip.md'
+  );
+
+  var actual = wrt.getEntryPath(notebook, date, words);
+  t.equal(actual, expected);
+  end(t);
+});
+
+tape('getEntryName correct for no title', function(t) {
+  var notebook = { path: '/path/to/notebook' };
+  var date = new Date('2016-12-25T20:00:00.000Z');
+  var words = [];
+  
+  var expected = path.join(
+    notebook.path, '2016', '2016-12-25_daily.md'
+  );
+
+  var actual = wrt.getEntryPath(notebook, date, words);
+  t.equal(actual, expected);
+  end(t);
+});
 
 tape('getConfig resolves path and returns contents', function(t) {
   var configPath = '~/path/to/config.json';
