@@ -1,0 +1,16 @@
+{
+  "name": "wrt",
+  "version": "1.0.0",
+  "description": "Start writing quickly. Helps you maintain notes and journals as standalone, organized files.",
+  "main": "index.js",
+  "scripts": {
+    "test": "tape test"
+  },
+  "keywords": [
+    "writing",
+    "notes",
+    "journal"
+  ],
+  "author": "Sam Sudar",
+  "license": "MIT"
+}
