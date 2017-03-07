@@ -1,10 +1,10 @@
 {
   "name": "wrt",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Start writing quickly. Helps you maintain notes and journals as standalone, organized files.",
   "main": "index.js",
   "scripts": {
-    "test": "tape test"
+    "test": "tape test/**/*.js"
   },
   "keywords": [
     "writing",
@@ -12,5 +12,22 @@
     "journal"
   ],
   "author": "Sam Sudar",
-  "license": "MIT"
+  "license": "MIT",
+  "bin": {
+    "wrt": "./index.js"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "chrono-node": "^1.2.5",
+    "commander": "^2.9.0",
+    "jsonfile": "^2.4.0",
+    "nconf": "^0.8.4",
+    "untildify": "^3.0.2"
+  },
+  "devDependencies": {
+    "proxyquire": "^1.7.11",
+    "sinon": "^1.17.7",
+    "sinon-as-promised": "^4.0.2",
+    "tape": "^4.6.3"
+  }
 }
