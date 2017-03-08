@@ -128,6 +128,25 @@ tape('handleValidatedInput opens editor', function(t) {
   end(t);
 });
 
+tape('editEntry calls spawn', function(t) {
+  var spawnSpy = sinon.stub();
+  proxyquireWrt({
+    'child_process': {
+      spawn: spawnSpy
+    }
+  });
+
+  var editorCmd = 'MacDown';
+  var entryPath = '/path/to/file.md';
+
+  wrt.editEntry(editorCmd, entryPath);
+  t.deepEqual(
+    spawnSpy.args[0],
+    [editorCmd, [entryPath], { stdio: 'inherit' }]
+  );
+  end(t);
+});
+
 tape('getNotebook gets named notebook', function(t) {
   var notebooks = {
     journal: { path: '/path/j' },
