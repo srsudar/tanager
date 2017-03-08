@@ -1,5 +1,5 @@
 {
-  "name": "wrt",
+  "name": "tanager",
   "version": "0.0.1",
   "description": "Start writing quickly. Helps you maintain notes and journals as standalone, organized files.",
   "main": "index.js",
@@ -14,17 +14,15 @@
   "author": "Sam Sudar",
   "license": "MIT",
   "bin": {
-    "wrt": "./index.js"
+    "tanager": "./index.js"
   },
   "dependencies": {
-    "bluebird": "^3.5.0",
     "chrono-node": "^1.2.5",
     "commander": "^2.9.0",
     "jsonfile": "^2.4.0",
     "merge": "^1.2.0",
     "mkdirp": "^0.5.1",
     "moment": "^2.17.1",
-    "nconf": "^0.8.4",
     "untildify": "^3.0.2"
   },
   "devDependencies": {

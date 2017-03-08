@@ -2,16 +2,16 @@
 'use strict';
 
 var program = require('commander');
-var wrt = require('./lib/wrt-core');
+var core = require('./lib/core');
 
 var words = [];
 program
-  .version(wrt.VERSION)
+  .version(core.VERSION)
   .option(
     '-c, --config-file <config-file>',
-    'Path to config file. Defaults to ~/.wrt.json',
+    'Path to config file. Defaults to ~/.tanager.json',
     String,
-    wrt.DEFAULT_CONFIG_PATH
+    core.DEFAULT_CONFIG_PATH
   )
   .option(
     '-d, --date <date>',
@@ -28,7 +28,7 @@ program
   })
   .parse(process.argv);
 
-wrt.handleRawInput(
+core.handleRawInput(
   {
     configFile: program.configFile,
     date: program.date,

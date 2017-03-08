@@ -139,7 +139,7 @@ tape('validateConfig exits if invalid', function(t) {
   config.validateConfig(noEditor);
   t.deepEqual(
     failStub.args[1], 
-    [new Error('No notebooks found. Set in .wrtc.json')]
+    [new Error('No notebooks found. Set in .tanager.json')]
   );
 
   var missingPath = merge(true, cfg);
@@ -147,7 +147,7 @@ tape('validateConfig exits if invalid', function(t) {
   config.validateConfig(missingPath);
   t.deepEqual(
     failStub.args[2], 
-    [new Error('Notebook missing a path in .wrtc.json, failing fast.')]
+    [new Error('Notebook missing a path in .tanager.json, failing fast.')]
   );
 
   end(t);

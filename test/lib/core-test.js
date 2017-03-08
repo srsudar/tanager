@@ -6,7 +6,7 @@ var sinon = require('sinon');
 var tape = require('tape');
 require('sinon-as-promised');
 
-var wrt = require('../../lib/wrt-core');
+var core = require('../../lib/core');
 
 /**
  * Manipulating the object directly leads to polluting the require cache. Any
@@ -15,17 +15,17 @@ var wrt = require('../../lib/wrt-core');
  */
 function reset() {
   delete require.cache[
-    require.resolve('../../lib/wrt-core')
+    require.resolve('../../lib/core')
   ];
-  wrt = require('../../lib/wrt-core');
+  core = require('../../lib/core');
 }
 
-function proxyquireWrt(proxies, keepBluebird) {
+function proxyquireCore(proxies, keepBluebird) {
   if (!keepBluebird) {
     // Don't promisify anything, to permit stubbing.
     proxies.bluebird = { promisifyAll: function() {} };
   }
-  wrt = proxyquire('../../lib/wrt-core', proxies);
+  core = proxyquire('../../lib/core', proxies);
 }
 
 function end(t) {
@@ -52,16 +52,16 @@ tape('handleRawInput parses given date and calls next', function(t) {
 
   var cliArgs = createaCliArgs(path, date, null);
 
-  proxyquireWrt({
+  proxyquireCore({
     'chrono-node': { parseDate: parseDateStub },
     './config': {
       resolveConfig: sinon.stub().withArgs(cliArgs).returns(config)
     }
   }, true);
-  wrt.handleValidatedInput = sinon.stub();
+  core.handleValidatedInput = sinon.stub();
 
-  wrt.handleRawInput(cliArgs, words);
-  t.deepEqual(wrt.handleValidatedInput.args[0], [config, date, words]);
+  core.handleRawInput(cliArgs, words);
+  t.deepEqual(core.handleValidatedInput.args[0], [config, date, words]);
   end(t);
 });
 
@@ -74,31 +74,31 @@ tape('handleRawInput gets now if no date given', function(t) {
 
   var cliArgs = createaCliArgs(path, dateArg, null);
 
-  proxyquireWrt({
+  proxyquireCore({
     './config': {
       resolveConfig: sinon.stub().withArgs(cliArgs).returns(config)
     }
   }, true);
-  wrt.getConfig = sinon.stub().withArgs(path).resolves(config);
-  wrt.handleValidatedInput = sinon.stub();
-  wrt.getNow = sinon.stub().returns(date);
+  core.getConfig = sinon.stub().withArgs(path).resolves(config);
+  core.handleValidatedInput = sinon.stub();
+  core.getNow = sinon.stub().returns(date);
 
-  wrt.handleRawInput(cliArgs, words);
-  t.deepEqual(wrt.handleValidatedInput.args[0], [config, date, words]);
+  core.handleRawInput(cliArgs, words);
+  t.deepEqual(core.handleValidatedInput.args[0], [config, date, words]);
   end(t);
 });
 
 tape('handleRawInput calls fail and quit on err', function(t) {
   var expected = { err: 'trouble' };
 
-  proxyquireWrt({
+  proxyquireCore({
     './config': {
       resolveConfig: sinon.stub().throws(expected)
     }
   }, true);
 
   var shouldThrow = function() {
-    wrt.handleRawInput({});
+    core.handleRawInput({});
   };
 
   t.throws(shouldThrow, expected);
@@ -115,22 +115,22 @@ tape('handleValidatedInput opens editor', function(t) {
   var date = new Date();
 
   var editStub = sinon.stub();
-  wrt.editEntry = editStub;
+  core.editEntry = editStub;
 
-  wrt.getNotebook = sinon.stub().withArgs(config, words).returns(notebook);
-  wrt.getEntryPath = sinon.stub().withArgs(notebook, date, words)
+  core.getNotebook = sinon.stub().withArgs(config, words).returns(notebook);
+  core.getEntryPath = sinon.stub().withArgs(notebook, date, words)
     .returns(entryPath);
 
-  wrt.handleValidatedInput(config, date, words);
+  core.handleValidatedInput(config, date, words);
   t.deepEqual(editStub.args[0], [config.editorCmd, entryPath]);
-  t.equal(wrt.getNotebook.callCount, 1);
-  t.equal(wrt.getEntryPath.callCount, 1);
+  t.equal(core.getNotebook.callCount, 1);
+  t.equal(core.getEntryPath.callCount, 1);
   end(t);
 });
 
 tape('editEntry calls spawn', function(t) {
   var spawnSpy = sinon.stub();
-  proxyquireWrt({
+  proxyquireCore({
     'child_process': {
       spawn: spawnSpy
     }
@@ -139,7 +139,7 @@ tape('editEntry calls spawn', function(t) {
   var editorCmd = 'MacDown';
   var entryPath = '/path/to/file.md';
 
-  wrt.editEntry(editorCmd, entryPath);
+  core.editEntry(editorCmd, entryPath);
   t.deepEqual(
     spawnSpy.args[0],
     [editorCmd, [entryPath], { stdio: 'inherit' }]
@@ -155,9 +155,9 @@ tape('getNotebook gets named notebook', function(t) {
   var expected = notebooks.journal;
 
   var config = { notebooks: notebooks };
-  wrt.getNotebooks = sinon.stub().withArgs(config).returns(notebooks);
+  core.getNotebooks = sinon.stub().withArgs(config).returns(notebooks);
 
-  var actual = wrt.getNotebook(config, ['journal']);
+  var actual = core.getNotebook(config, ['journal']);
   t.deepEqual(actual, expected);
   end(t);
 });
@@ -173,12 +173,12 @@ tape('getNotebook gets default notebook', function(t) {
   };
   var expected = notebooks.mostUsed;
   var config = { notebooks: notebooks };
-  wrt.getNotebooks = sinon.stub().withArgs(config).returns(notebooks);
+  core.getNotebooks = sinon.stub().withArgs(config).returns(notebooks);
 
-  var actual = wrt.getNotebook(config, ['what', 'a', 'great', 'day']);
+  var actual = core.getNotebook(config, ['what', 'a', 'great', 'day']);
   t.deepEqual(actual, expected);
 
-  actual = wrt.getNotebook(config, []);
+  actual = core.getNotebook(config, []);
   t.deepEqual(actual, expected);
 
   end(t);
@@ -191,11 +191,11 @@ tape('getNotebook throws if no default', function(t) {
   };
 
   var config = { notebooks: notebooks };
-  wrt.getNotebooks = sinon.stub().withArgs(config).returns(notebooks);
+  core.getNotebooks = sinon.stub().withArgs(config).returns(notebooks);
   var expected = new Error('Cannot find notebook. Check name or set default.');
 
   var shouldThrow = function() {
-    wrt.getNotebook(config, []);
+    core.getNotebook(config, []);
   };
 
   t.throws(shouldThrow, expected);
@@ -210,7 +210,7 @@ tape('getEntryPath correct when given title', function(t) {
   var words = ['meeting', 'with', 'vip'];
 
   var mkdirpStub = sinon.stub();
-  proxyquireWrt({
+  proxyquireCore({
     'mkdirp': {
       sync: mkdirpStub
     }
@@ -220,7 +220,7 @@ tape('getEntryPath correct when given title', function(t) {
     notebook.path, '2016', '2016-03-05_meeting-with-vip.md'
   );
 
-  var actual = wrt.getEntryPath(notebook, date, words);
+  var actual = core.getEntryPath(notebook, date, words);
   t.equal(actual, expected);
   t.deepEqual(mkdirpStub.args[0], [path.join(notebook.path, '2016')]);
   end(t);
@@ -231,7 +231,7 @@ tape('getEntryName correct for no title', function(t) {
   var date = new Date('2016-12-25T20:00:00.000Z');
   var words = [];
   
-  proxyquireWrt({
+  proxyquireCore({
     'mkdirp': {
       sync: sinon.stub()
     }
@@ -241,7 +241,7 @@ tape('getEntryName correct for no title', function(t) {
     notebook.path, '2016', '2016-12-25_daily.md'
   );
 
-  var actual = wrt.getEntryPath(notebook, date, words);
+  var actual = core.getEntryPath(notebook, date, words);
   t.equal(actual, expected);
   end(t);
 });
@@ -275,7 +275,7 @@ tape('getNotebooks resolves paths and adds aliases', function(t) {
   untildifyStub.withArgs(config.notebooks.notes.path)
     .returns(expectedNotes.path);
 
-  proxyquireWrt({ 'untildify': untildifyStub });
+  proxyquireCore({ 'untildify': untildifyStub });
 
   var expected = {
     journal: expectedJournal,
@@ -284,7 +284,7 @@ tape('getNotebooks resolves paths and adds aliases', function(t) {
     notes: expectedNotes
   };
 
-  var actual = wrt.getNotebooks(config);
+  var actual = core.getNotebooks(config);
 
   t.deepEqual(actual, expected);
   end(t);
