@@ -101,6 +101,61 @@ tape('handleRawInput calls fail and quit on err', function(t) {
   });
 });
 
+tape('getNotebook gets named notebook', function(t) {
+  var notebooks = {
+    journal: { path: '/path/j' },
+    notes: { path: '/path/n' }
+  };
+  var expected = notebooks.journal;
+
+  var config = { notebooks: notebooks };
+  wrt.getNotebooks = sinon.stub().withArgs(config).returns(notebooks);
+
+  var actual = wrt.getNotebook(config, ['journal']);
+  t.deepEqual(actual, expected);
+  end(t);
+});
+
+tape('getNotebook gets default notebook', function(t) {
+  var notebooks = {
+    journal: { path: '/path/j' },
+    notes: { path: '/path/n' },
+    mostUsed: {
+      path: '/path/m',
+      default: true
+    }
+  };
+  var expected = notebooks.mostUsed;
+  var config = { notebooks: notebooks };
+  wrt.getNotebooks = sinon.stub().withArgs(config).returns(notebooks);
+
+  var actual = wrt.getNotebook(config, ['what', 'a', 'great', 'day']);
+  t.deepEqual(actual, expected);
+
+  actual = wrt.getNotebook(config, []);
+  t.deepEqual(actual, expected);
+
+  end(t);
+});
+
+tape('getNotebook throws if no default', function(t) {
+  var notebooks = {
+    journal: { path: '/path/j' },
+    notes: { path: '/path/n' }
+  };
+
+  var config = { notebooks: notebooks };
+  wrt.getNotebooks = sinon.stub().withArgs(config).returns(notebooks);
+  var expected = new Error('Cannot find notebook. Check name or set default.');
+
+  var shouldThrow = function() {
+    wrt.getNotebook(config, []);
+  };
+
+  t.throws(shouldThrow, expected);
+  end(t);
+});
+
 tape('getEntryPath correct when given title', function(t) {
   var notebook = { path: '/path/to/notebook' };
   // TODO: These tests are machine-dependent when it comes to time zone. Going
