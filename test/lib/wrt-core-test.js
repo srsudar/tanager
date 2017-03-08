@@ -101,6 +101,29 @@ tape('handleRawInput calls fail and quit on err', function(t) {
   });
 });
 
+tape('handleValidatedInput opens editor', function(t) {
+  var notebook = { path: '/path/to/notebook' };
+  var entryPath = path.join(
+    notebook.path, '2016', '2016-03-05_lame-meeting.md'
+  );
+  var words = ['lame', 'meeting'];
+  var config = { editorCmd: 'vim -e' };
+  var date = new Date();
+
+  var editStub = sinon.stub();
+  wrt.editEntry = editStub;
+
+  wrt.getNotebook = sinon.stub().withArgs(config, words).returns(notebook);
+  wrt.getEntryPath = sinon.stub().withArgs(notebook, date, words)
+    .returns(entryPath);
+
+  wrt.handleValidatedInput(config, date, words);
+  t.deepEqual(editStub.args[0], [config.editorCmd, entryPath]);
+  t.equal(wrt.getNotebook.callCount, 1);
+  t.equal(wrt.getEntryPath.callCount, 1);
+  end(t);
+});
+
 tape('getNotebook gets named notebook', function(t) {
   var notebooks = {
     journal: { path: '/path/j' },
@@ -162,6 +185,13 @@ tape('getEntryPath correct when given title', function(t) {
   // to let this slide for now, but should be fixed.
   var date = new Date('2016-03-05T20:00:00.000Z');
   var words = ['meeting', 'with', 'vip'];
+
+  var mkdirpStub = sinon.stub();
+  proxyquireWrt({
+    'mkdirp': {
+      sync: mkdirpStub
+    }
+  });
   
   var expected = path.join(
     notebook.path, '2016', '2016-03-05_meeting-with-vip.md'
@@ -169,6 +199,7 @@ tape('getEntryPath correct when given title', function(t) {
 
   var actual = wrt.getEntryPath(notebook, date, words);
   t.equal(actual, expected);
+  t.deepEqual(mkdirpStub.args[0], [path.join(notebook.path, '2016')]);
   end(t);
 });
 
@@ -177,6 +208,12 @@ tape('getEntryName correct for no title', function(t) {
   var date = new Date('2016-12-25T20:00:00.000Z');
   var words = [];
   
+  proxyquireWrt({
+    'mkdirp': {
+      sync: sinon.stub()
+    }
+  });
+
   var expected = path.join(
     notebook.path, '2016', '2016-12-25_daily.md'
   );
@@ -186,57 +223,14 @@ tape('getEntryName correct for no title', function(t) {
   end(t);
 });
 
-tape('getConfig resolves path and returns contents', function(t) {
-  var configPath = '~/path/to/config.json';
-  var resolvedPath = '/abs/path';
-
-  var expected = { expected: 'fileContents' };
-
-  proxyquireWrt({
-    'untildify': sinon.stub().withArgs(configPath).returns(resolvedPath),
-    'jsonfile': {
-      'readFileAsync': sinon.stub().withArgs(resolvedPath).resolves(expected)
-    }
-  });
-
-  wrt.getConfig(configPath)
-  .then(actual => {
-    t.deepEqual(actual, expected);
-    end(t);
-  })
-  .catch(err => {
-    t.fail(err);
-    end(t);
-  });
-});
-
-tape('getConfig rejects if file read rejects', function(t) {
-  var configFile = '/abs/path/to/config';
-  var expected = { err: 'trouble reading file' };
-
-  proxyquireWrt({
-    'jsonfile': {
-      'readFileAsync': sinon.stub().withArgs(configFile).rejects(expected)
-    }
-  });
-
-  wrt.getConfig(configFile)
-  .then(actual => {
-    t.fail(actual);
-    end(t);
-  })
-  .catch(actual => {
-    t.deepEqual(actual, expected);
-    end(t);
-  });
-});
-
 tape('getNotebooks resolves paths and adds aliases', function(t) {
   var config = {
     notebooks: {
       journal: {
         path: '~/path/to/journal',
-        aliases: [ 'j', 'jrnl' ]
+        aliases: [ 'j', 'jrnl' ],
+        otherVal: 'oh whoops',
+        default: true
       },
       notes: {
         path: '/abs/path/to/notes'
@@ -244,7 +238,12 @@ tape('getNotebooks resolves paths and adds aliases', function(t) {
     }
   };
 
-  var expectedJournal = { path: '/abs/path/to/journal' };
+  var expectedJournal = {
+    path: '/abs/path/to/journal',
+    aliases: config.notebooks.journal.aliases,
+    otherVal: config.notebooks.journal.otherVal,
+    default: config.notebooks.journal.default
+  };
   var expectedNotes = { path: '/abs/path/to/notes' };
 
   var untildifyStub = sinon.stub();
