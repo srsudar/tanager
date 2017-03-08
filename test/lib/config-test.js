@@ -1,5 +1,6 @@
 'use strict';
 
+var merge = require('merge');
 var proxyquire = require('proxyquire');
 var sinon = require('sinon');
 var tape = require('tape');
@@ -33,6 +34,168 @@ function end(t) {
   reset();
 }
 
+function getValidConfig() {
+  var cfg = {
+    editorCmd: 'vim -e',
+    notebooks: {
+      journal: {
+        path: '/path/to/jrnl'
+      }
+    }
+  };
+  return cfg;
+}
+
+tape('resolveConfig relies on default', function(t) {
+  var cliArgs = {
+    configFile: '/path/to/config/file',
+    editorCmd: 'vim -e'
+  };
+
+  var defaultConfig = {
+    defOnly: 'from default',
+    fileRules: 'from default',
+    cliRules: 'from default'
+  };
+
+  var fileConfig = {
+    fileOnly: 'from file',
+    fileRules: 'from file',
+    cliRules: 'from file'
+  };
+
+  var cliConfig = {
+    cliOnly: 'from cli',
+    cliRules: 'from cli'
+  };
+
+  var expected = {
+    defOnly: defaultConfig.defOnly,
+    fileOnly: fileConfig.fileOnly,
+    cliOnly: cliConfig.cliOnly,
+    fileRules: fileConfig.fileRules,
+    cliRules: cliConfig.cliRules
+  };
+
+  config.getDefaultConfig = sinon.stub().returns(defaultConfig);
+  config.getFileConfig = sinon.stub().withArgs(cliArgs.configFile)
+    .returns(fileConfig);
+  config.getCliConfig = sinon.stub().withArgs(cliArgs).returns(cliConfig);
+
+  config.validateConfig = sinon.stub();
+  config.expandConfigPaths = sinon.stub();
+
+  var actual = config.resolveConfig(cliArgs);
+  t.deepEqual(actual, expected);
+  t.deepEqual(config.validateConfig.args[0], [actual]);
+  t.deepEqual(config.expandConfigPaths.args[0], [actual]);
+  end(t);
+});
+
+tape('validateConfig does nothing if all well', function(t) {
+  var cfg = getValidConfig();
+
+  var failStub = sinon.stub();
+  proxyquireConfig({
+    './util': {
+      failAndQuit: failStub
+    }
+  });
+
+  config.validateConfig(cfg);
+  t.equal(failStub.callCount, 0);
+  end(t);
+});
+
+tape('validateConfig exits if invalid', function(t) {
+  // Start with a valid config and delete things.
+  var cfg = {
+    editorCmd: 'vim -e',
+    notebooks: {
+      journal: {
+        path: '/path/to/jrnl'
+      }
+    }
+  };
+
+  var failStub = sinon.stub();
+  proxyquireConfig({
+    './util': {
+      failAndQuit: failStub
+    }
+  });
+
+  // We'll use merge to copy things.
+  var noEditor = merge(true, cfg);
+  delete(noEditor.editorCmd);
+  config.validateConfig(noEditor);
+  t.deepEqual(
+    failStub.args[0], 
+    [new Error('Could not find editor. Try setting $VISUAL.')]
+  );
+
+  var noNotebooks = merge(true, cfg);
+  delete(noNotebooks.notebooks);
+  config.validateConfig(noEditor);
+  t.deepEqual(
+    failStub.args[1], 
+    [new Error('No notebooks found. Set in .wrtc.json')]
+  );
+
+  var missingPath = merge(true, cfg);
+  delete(missingPath.notebooks.journal.path);
+  config.validateConfig(missingPath);
+  t.deepEqual(
+    failStub.args[2], 
+    [new Error('Notebook missing a path in .wrtc.json, failing fast.')]
+  );
+
+  end(t);
+});
+
+tape('expandConfigPaths expands paths', function(t) {
+  var cfg = {
+    notebooks: {
+      journal: {
+        path: '~/a/b/c'
+      },
+      notes: {
+        path: '/abs/notes'
+      }
+    }
+  };
+
+  var absJournalPath = '/abs/path/to/a/b/c';
+
+  var untildifyStub = sinon.stub();
+  untildifyStub.withArgs(cfg.notebooks.journal.path).returns(absJournalPath);
+  untildifyStub.withArgs(cfg.notebooks.notes.path)
+    .returns(cfg.notebooks.notes.path);
+  proxyquireConfig({ 'untildify': untildifyStub });
+
+  var expected = merge(true, cfg);
+  expected.notebooks.journal.path = absJournalPath;
+  // we modify cfg in place
+  config.expandConfigPaths(cfg);
+  t.deepEqual(cfg, expected);
+  end(t);
+});
+
+tape('buildConfig respects nulls', function(t) {
+  var expected = {};
+  var actual = config.buildConfig(undefined);
+  t.deepEqual(actual, expected);
+  end(t);
+});
+
+tape('buildConfig returns expected', function(t) {
+  var cmd = 'vim -e';
+  var expected = { editorCmd: cmd };
+  var actual = config.buildConfig(cmd);
+  t.deepEqual(actual, expected);
+  end(t);
+});
+
 tape('resolvePriority returns first truthy value', function(t) {
   var arr = ['foo', 'bar'];
   t.equal(config.resolvePriority(arr), arr[0]);
@@ -48,36 +211,20 @@ tape('resolvePriority returns null if no truthy values', function(t) {
   end(t);
 });
 
-tape('getEditorCmd resolves and returns', function(t) {
-  var clArg = 'foo';
-  var resolvePriorityStub = sinon.stub().returns(clArg);
+tape('getEditorCmdFromEnv resolves and returns', function(t) {
+  var resolvePriorityStub = sinon.stub().returns();
   config.resolvePriority = resolvePriorityStub;
 
-  var actual = config.getEditorCmd(clArg);
-  t.equal(actual, clArg);
+  config.getEditorCmdFromEnv();
   t.equal(resolvePriorityStub.callCount, 1);
-  t.equal(resolvePriorityStub.args[0][0].length, 3);
-  t.equal(resolvePriorityStub.args[0][0][0], clArg);
+  t.deepEqual(
+    resolvePriorityStub.args[0][0], 
+    [process.env.VISUAL, process.env.EDITOR]
+  );
   end(t);
 });
 
-tape('getEditorCmd calls quit if no editor', function(t) {
-  var failAndQuitStub = sinon.stub();
-  var resolvePriorityStub = sinon.stub().returns(null);
-
-  proxyquireConfig({
-    './util': {
-      failAndQuit: failAndQuitStub
-    }
-  });
-  config.resolvePriority = resolvePriorityStub;
-
-  config.getEditorCmd(null);
-  t.equal(failAndQuitStub.callCount, 1);
-  end(t);
-});
-
-tape('getConfig resolves path and returns contents', function(t) {
+tape('getFileConfig resolves path and returns contents', function(t) {
   var configPath = '~/path/to/config.json';
   var resolvedPath = '/abs/path';
 
@@ -86,38 +233,28 @@ tape('getConfig resolves path and returns contents', function(t) {
   proxyquireConfig({
     'untildify': sinon.stub().withArgs(configPath).returns(resolvedPath),
     'jsonfile': {
-      'readFileAsync': sinon.stub().withArgs(resolvedPath).resolves(expected)
+      'readFileSync': sinon.stub().withArgs(resolvedPath).returns(expected)
     }
   });
 
-  config.getConfig(configPath)
-  .then(actual => {
-    t.deepEqual(actual, expected);
-    end(t);
-  })
-  .catch(err => {
-    t.fail(err);
-    end(t);
-  });
+  var actual = config.getFileConfig(configPath);
+  t.deepEqual(actual, expected);
+  end(t);
 });
 
-tape('getConfig rejects if file read rejects', function(t) {
-  var configFile = '/abs/path/to/config';
-  var expected = { err: 'trouble reading file' };
+tape('getDefaultConfig returns defaults', function(t) {
+  var defaultEditor = 'Marked2';
+  config.getEditorCmdFromEnv = sinon.stub().returns(defaultEditor);
+  var expected = { editorCmd: defaultEditor };
+  var actual = config.getDefaultConfig();
+  t.deepEqual(actual, expected);
+  end(t);
+});
 
-  proxyquireConfig({
-    'jsonfile': {
-      'readFileAsync': sinon.stub().withArgs(configFile).rejects(expected)
-    }
-  });
-
-  config.getConfig(configFile)
-  .then(actual => {
-    t.fail(actual);
-    end(t);
-  })
-  .catch(actual => {
-    t.deepEqual(actual, expected);
-    end(t);
-  });
+tape('getCliConfig returns from cli', function(t) {
+  var cliEditor = 'emacs';
+  var expected = { editorCmd: cliEditor };
+  var actual = config.getCliConfig({ editorCmd: cliEditor });
+  t.deepEqual(actual, expected);
+  end(t);
 });
