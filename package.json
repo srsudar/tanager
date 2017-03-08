@@ -16,6 +16,11 @@
   "bin": {
     "tanager": "./index.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/srsudar/tanager.git"
+  },
+  "homepage": "https://github.com/srsudar/tanager",
   "dependencies": {
     "chrono-node": "^1.2.5",
     "commander": "^2.9.0",
