@@ -34,6 +34,14 @@ function end(t) {
   reset();
 }
 
+function createaCliArgs(configPath, date, editorCmd) {
+  return {
+    configFile: configPath,
+    date: date,
+    editorCmd: editorCmd
+  };
+}
+
 tape('handleRawInput parses given date and calls next', function(t) {
   var path = 'path/to/config';
   var date = new Date('2016-03-05T20:00:00.000Z');
@@ -42,22 +50,19 @@ tape('handleRawInput parses given date and calls next', function(t) {
   var config = { config: 'much value' };
   var words = ['foo', 'bar'];
 
+  var cliArgs = createaCliArgs(path, date, null);
+
   proxyquireWrt({
-    'chrono-node': { parseDate: parseDateStub }
+    'chrono-node': { parseDate: parseDateStub },
+    './config': {
+      resolveConfig: sinon.stub().withArgs(cliArgs).returns(config)
+    }
   }, true);
-  wrt.getConfig = sinon.stub().withArgs(path).resolves(config);
   wrt.handleValidatedInput = sinon.stub();
 
-  wrt.handleRawInput(path, dateArg, words)
-  .then(actual => {
-    t.equal(actual, undefined);
-    t.deepEqual(wrt.handleValidatedInput.args[0], [config, date, words]);
-    end(t);
-  })
-  .catch(err => {
-    t.fail(err);
-    end(t);
-  });
+  wrt.handleRawInput(cliArgs, words);
+  t.deepEqual(wrt.handleValidatedInput.args[0], [config, date, words]);
+  end(t);
 });
 
 tape('handleRawInput gets now if no date given', function(t) {
@@ -67,38 +72,37 @@ tape('handleRawInput gets now if no date given', function(t) {
   var config = { config: 'much value' };
   var words = ['foo', 'bar'];
 
+  var cliArgs = createaCliArgs(path, dateArg, null);
+
+  proxyquireWrt({
+    './config': {
+      resolveConfig: sinon.stub().withArgs(cliArgs).returns(config)
+    }
+  }, true);
   wrt.getConfig = sinon.stub().withArgs(path).resolves(config);
   wrt.handleValidatedInput = sinon.stub();
   wrt.getNow = sinon.stub().returns(date);
 
-  wrt.handleRawInput(path, dateArg, words)
-  .then(actual => {
-    t.equal(actual, undefined);
-    t.deepEqual(wrt.handleValidatedInput.args[0], [config, date, words]);
-    end(t);
-  })
-  .catch(err => {
-    t.fail(err);
-    end(t);
-  });
+  wrt.handleRawInput(cliArgs, words);
+  t.deepEqual(wrt.handleValidatedInput.args[0], [config, date, words]);
+  end(t);
 });
 
 tape('handleRawInput calls fail and quit on err', function(t) {
   var expected = { err: 'trouble' };
 
-  wrt.getConfig = sinon.stub().rejects(expected);
-  wrt.failAndQuit = sinon.stub();
+  proxyquireWrt({
+    './config': {
+      resolveConfig: sinon.stub().throws(expected)
+    }
+  }, true);
 
-  wrt.handleRawInput('path')
-  .then(actual => {
-    t.fail(actual);
-    end(t);
-  })
-  .catch(actual => {
-    t.deepEqual(actual, expected);
-    t.deepEqual(wrt.failAndQuit.args[0], [expected]);
-    end(t);
-  });
+  var shouldThrow = function() {
+    wrt.handleRawInput({});
+  };
+
+  t.throws(shouldThrow, expected);
+  end(t);
 });
 
 tape('handleValidatedInput opens editor', function(t) {

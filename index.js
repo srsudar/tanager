@@ -4,7 +4,7 @@
 var program = require('commander');
 var wrt = require('./lib/wrt-core');
 
-var words = null;
+var words = [];
 program
   .version(wrt.VERSION)
   .option(
