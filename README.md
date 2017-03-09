@@ -39,7 +39,7 @@ You can run `tanager` from your local repo by cloning and typing `npm install
 -g` from the local directory. Alternatively, you can use `npm`:
 
 ```
-npm install tanager
+npm install -g tanager
 ```
 
 To run tests:
