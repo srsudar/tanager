@@ -1,4 +1,6 @@
-> tanager
+> Manager your notebooks. Start writing quickly.
+
+[![Build Status](https://travis-ci.org/srsudar/tanager.svg?branch=master)](https://travis-ci.org/srsudar/tanager)
 
 # tanager: Hassle Free Writing
 
@@ -32,7 +34,7 @@ title will be `daily`.
 
 Keep in mind that however you install it, you'll have to set up a config file
 before it will work. Eventually I might add a smart setup option, but for now
-you have to do this by hand. See the [Configuration](#Configuration) section
+you have to do this by hand. See the [Configuration](#configuration) section
 below.
 
 You can run `tanager` from your local repo by cloning and typing `npm install
