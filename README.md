@@ -1,4 +1,4 @@
-> Manager your notebooks. Start writing quickly.
+> Manage your notebooks. Start writing quickly.
 
 [![Build Status](https://travis-ci.org/srsudar/tanager.svg?branch=master)](https://travis-ci.org/srsudar/tanager)
 
