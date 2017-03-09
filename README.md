@@ -7,11 +7,14 @@
 `tanager` is a notebook manager. It helps you organize files for writing. Use
 it to organize your journals and notes. It does not impose any structure on
 these files, but it is opinionated about where the files are stored and how
-they are named
+they are named.
 
-If you like to maintain notes in flat files, and spend a lot of time navigating
+If you like to maintain notes in flat files and spend a lot of time navigating
 to the correct directories or abiding by your own naming conventions, `tanager`
 could be for you.
+
+
+# Overview
 
 `tanager` does absolutely nothing fancy. It could just as easily be a shell
 script or system of shell aliases. For example, imagine this workflow. I have a
@@ -29,6 +32,42 @@ same thing. (Note that if you had a notebook called `day`, it might not do what
 you wanted, instead adding an entry to the notebook called `day`.) If I'm just
 making a quick note and I don't want to give the file name a title, the default
 title will be `daily`.
+
+
+# Usage
+
+`tanager` helps you start writing quickly. See the [understanding
+tanager](#understanding-tanager) section to see where it puts your files. To
+start writing notes in your `notes` notebook:
+
+```
+tanager notes meeting with vip
+```
+
+If the day is March 9, 2017, this will open your editor with a file called:
+`2017-03-09_meeting-with-vip.md`. You can then begin editing.
+
+If you also have a notebook called `journal`, you can instead type:
+
+```shell
+tanager journal day one in peru
+```
+
+This will open a file named `2017-03-09_day-one-in-peru.md`, but will be in
+your `journal` notebook (i.e. saved in a different directory).
+
+You can also specify a different date using the `-d` flag. This does its best
+to do natural language parsing as provided by the
+[`chrono`](https://github.com/wanasit/chrono) library. To start a journal entry
+for yesterday, you can say:
+
+```shell
+tanager -d yesterday leaving for lichtenstein
+```
+
+This will interpret `yesterday` to be the date, so instead it will open your
+editor to `2017-03-08_leaving-for-lichtenstein.md`.
+
 
 # Installation
 
@@ -49,7 +88,6 @@ To run tests:
 ```
 npm test
 ```
-
 
 # Understanding tanager
 
