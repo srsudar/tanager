@@ -28,6 +28,26 @@ you wanted, instead adding an entry to the notebook called `day`.) If I'm just
 making a quick note and I don't want to give the file name a title, the default
 title will be `daily`.
 
+# Installation
+
+Keep in mind that however you install it, you'll have to set up a config file
+before it will work. Eventually I might add a smart setup option, but for now
+you have to do this by hand. See the [Configuration](#Configuration) section
+below.
+
+You can run `tanager` from your local repo by cloning and typing `npm install
+-g` from the local directory. Alternatively, you can use `npm`:
+
+```
+npm install tanager
+```
+
+To run tests:
+
+```
+npm test
+```
+
 
 # Understanding tanager
 
