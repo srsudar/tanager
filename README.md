@@ -2,6 +2,10 @@
 
 [![Build Status](https://travis-ci.org/srsudar/tanager.svg?branch=master)](https://travis-ci.org/srsudar/tanager)
 
+<p align="center">
+  <img alt="Icon" src="./assets/icon-512.png" width="256"/>
+</p>
+
 # tanager: Hassle Free Writing
 
 `tanager` is a notebook manager. It helps you organize files for writing. Use
