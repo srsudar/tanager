@@ -22,6 +22,10 @@ program
     'Editor used to edit. Defaults to config.editor, $VISUAL, then $EDITOR',
     String
   )
+  .option(
+    '-r, --recent',
+    'Edit the most recently modified file in a notebook'
+  )
   .arguments('<words...>')
   .action(function(cliWords) {
     words = cliWords;
@@ -30,6 +34,7 @@ program
 
 core.handleRawInput(
   {
+    editRecent: program.recent,
     configFile: program.configFile,
     date: program.date,
     editorCmd: program.editorCmd

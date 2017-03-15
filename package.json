@@ -22,8 +22,10 @@
   },
   "homepage": "https://github.com/srsudar/tanager",
   "dependencies": {
+    "bluebird": "^3.5.0",
     "chrono-node": "^1.2.5",
     "commander": "^2.9.0",
+    "glob": "^7.1.1",
     "jsonfile": "^2.4.0",
     "merge": "^1.2.0",
     "mkdirp": "^0.5.1",

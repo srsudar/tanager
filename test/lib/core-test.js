@@ -128,6 +128,97 @@ tape('handleValidatedInput opens editor', function(t) {
   end(t);
 });
 
+tape('handleValidatedInput calls editLastModifiedFile', function(t) {
+  var notebook = 'notebook';
+  var config = { editRecent: true };
+  var words = ['foo', 'bar'];
+
+  var getNotebookStub = sinon.stub().withArgs(config, words).returns(notebook);
+  var editLastStub = sinon.stub();
+  var editEntryStub = sinon.stub();
+
+  core.getNotebook = getNotebookStub;
+  core.editLastModifiedFile = editLastStub;
+  core.editEntry = editEntryStub;
+
+  core.handleValidatedInput(config, null, words);
+  
+  t.deepEqual(editLastStub.args[0], [config, notebook]);
+  t.equal(editEntryStub.callCount, 0);
+  end(t);
+});
+
+tape('editLastModifiedFile calls fail and rejects if error', function(t) {
+  var expected = { err: 'trubs' };
+  var getFileStub = sinon.stub().rejects(expected);
+
+  proxyquireCore({ './util':
+    { getLastModifiedFile: getFileStub }
+  });
+
+  core.editLastModifiedFile({}, {})
+  .then(success => {
+    t.fail(success);
+    end(t);
+  })
+  .catch(actual => {
+    t.equal(actual, expected);
+    end(t);
+  });
+});
+
+tape('editLastModifiedFile calls editEntry with last file', function(t) {
+  var notebook = { path: '/Users/cersei/cute-joff' };
+  var config = { editorCmd: 'word' };  // Cersei seems like a Word user
+
+  var entryPath = '/Users/cersei/cute-joff/ten-years-later-first-entry.md';
+
+  var getFileStub = sinon.stub().withArgs(notebook.path, ['.md'])
+    .resolves(entryPath);
+  var editEntryStub = sinon.stub();
+
+  proxyquireCore({ './util':
+    { getLastModifiedFile: getFileStub }
+  });
+  core.editEntry = editEntryStub;
+
+  core.editLastModifiedFile(config, notebook)
+  .then(() => {
+    t.deepEqual(editEntryStub.args[0], [config.editorCmd, entryPath]);
+    end(t);
+  })
+  .catch(err => {
+    t.fail(err);
+    end(t);
+  });
+});
+
+tape('editLastModifiedFile does nothing if no files', function(t) {
+  var getFileStub = sinon.stub().resolves(null);
+  var editEntryStub = sinon.stub();
+  var failAndQuitStub = sinon.stub();
+
+  proxyquireCore({ './util':
+    {
+      getLastModifiedFile: getFileStub,
+      failAndQuit: failAndQuitStub
+    }
+  });
+  core.editEntry = editEntryStub;
+
+  core.editLastModifiedFile({}, {})
+  .then(() => {
+    t.equal(editEntryStub.callCount, 0);
+    t.deepEqual(failAndQuitStub.args[0], ['No files in notebook']);
+    end(t);
+  })
+  .catch(err => {
+    t.fail(err);
+    end(t);
+  });
+
+});
+
 tape('editEntry calls spawn', function(t) {
   var spawnSpy = sinon.stub();
   proxyquireCore({

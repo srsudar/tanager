@@ -38,7 +38,30 @@ making a quick note and I don't want to give the file name a title, the default
 title will be `daily`.
 
 
+# Installation
+
+Keep in mind that however you install it, you'll have to set up a config file
+before it will work. Eventually I might add a smart setup option, but for now
+you have to do this by hand. See the [Configuration](#configuration) section
+below.
+
+You can run `tanager` from your local repo by cloning and typing `npm install
+-g` from the local directory. Alternatively, you can use `npm`:
+
+```
+npm install -g tanager
+```
+
+To run tests:
+
+```
+npm test
+```
+
+
 # Usage
+
+## Overview
 
 `tanager` helps you start writing quickly. See the [understanding
 tanager](#understanding-tanager) section to see where it puts your files. To
@@ -60,6 +83,9 @@ tanager journal day one in peru
 This will open a file named `2017-03-09_day-one-in-peru.md`, but will be in
 your `journal` notebook (i.e. saved in a different directory).
 
+
+## Specifying a Date Other Than Today
+
 You can also specify a different date using the `-d` flag. This does its best
 to do natural language parsing as provided by the
 [`chrono`](https://github.com/wanasit/chrono) library. To start a journal entry
@@ -73,25 +99,31 @@ This will interpret `yesterday` to be the date, so instead it will open your
 editor to `2017-03-08_leaving-for-lichtenstein.md`.
 
 
-# Installation
+## Editing Last Modified File
 
-Keep in mind that however you install it, you'll have to set up a config file
-before it will work. Eventually I might add a smart setup option, but for now
-you have to do this by hand. See the [Configuration](#configuration) section
-below.
+The `-r`/`--recent` flag will begin editing the most recently modified file in
+a given notebook, allowing you to repeatedly update an entry over the course of
+a day or jump back in after a restart.
 
-You can run `tanager` from your local repo by cloning and typing `npm install
--g` from the local directory. Alternatively, you can use `npm`:
+## Full Output of `tanager --help`
 
 ```
-npm install -g tanager
+  Usage: tanager [options] <words...>
+
+  Options:
+
+    -h, --help                       output usage information
+    -V, --version                    output the version number
+    -c, --config-file <config-file>  Path to config file. Defaults to
+                                       ~/.tanager.json
+    -d, --date <date>                Date of the entry. Yesterday, dec5,
+                                       "dec 5", etc
+    -e, --editor-cmd <editor-cmd>    Editor used to edit. Defaults to
+                                       config.editor, $VISUAL, then $EDITOR
+    -r, --recent                     Edit the most recently modified file in
+                                       a notebook
 ```
 
-To run tests:
-
-```
-npm test
-```
 
 # Understanding tanager
 
