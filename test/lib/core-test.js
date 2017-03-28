@@ -317,7 +317,7 @@ tape('getEntryPath correct when given title', function(t) {
   end(t);
 });
 
-tape('getEntryName correct for no title', function(t) {
+tape('getEntryPath correct for no title and default notebook', function(t) {
   var notebook = { path: '/path/to/notebook' };
   var date = new Date('2016-12-25T20:00:00.000Z');
   var words = [];
@@ -333,6 +333,78 @@ tape('getEntryName correct for no title', function(t) {
   );
 
   var actual = core.getEntryPath(notebook, date, words);
+  t.equal(actual, expected);
+  end(t);
+});
+
+tape('getEntryTitleWords correct for default notebook, no title', function(t) {
+  var notebook = {
+    _name: 'journal',
+    default: true
+  };
+  var words = [];
+
+  var expected = core.DEFAULT_NAME_NO_TITLE;
+  var actual = core.getEntryTitleWords(notebook, words);
+
+  t.equal(actual, expected);
+  end(t);
+});
+
+tape('getEntryTitleWords correct for default notebook, title in config',
+    function(t) {
+  var notebook = {
+    _name: 'journal',
+    default: true,
+    defaultTitle: 'title-son'
+  };
+  var words = [];
+
+  var expected = notebook.defaultTitle;
+  var actual = core.getEntryTitleWords(notebook, words);
+
+  t.equal(actual, expected);
+  end(t);
+});
+
+tape('getEntryTitleWords correct for default notebook set title', function(t) {
+  var notebook = {
+    _name: 'journal',
+    default: true
+  };
+  var words = ['meeting', 'with', 'tyrion'];
+
+  var expected = 'meeting-with-tyrion';
+  var actual = core.getEntryTitleWords(notebook, words);
+
+  t.equal(actual, expected);
+  end(t);
+});
+
+tape('getEntryTitleWords correct for custom notebook, no title', function(t) {
+  var notebook = {
+    _name: 'notes',
+    default: false
+  };
+  var words = [];
+
+  var expected = core.DEFAULT_NAME_NO_TITLE;
+  var actual = core.getEntryTitleWords(notebook, words);
+
+  t.equal(actual, expected);
+  end(t);
+});
+
+tape('getEntryTitleWords correct for custom notebook set title', function(t) {
+  var notebook = {
+    _name: 'journal',
+    default: false
+  };
+  var words = ['notes', 'on', 'winterfell'];
+
+  var expected = 'notes-on-winterfell';
+  var actual = core.getEntryTitleWords(notebook, words);
+
   t.equal(actual, expected);
   end(t);
 });
@@ -356,9 +428,13 @@ tape('getNotebooks resolves paths and adds aliases', function(t) {
     path: '/abs/path/to/journal',
     aliases: config.notebooks.journal.aliases,
     otherVal: config.notebooks.journal.otherVal,
-    default: config.notebooks.journal.default
+    default: config.notebooks.journal.default,
+    _name: 'journal'
   };
-  var expectedNotes = { path: '/abs/path/to/notes' };
+  var expectedNotes = {
+    path: '/abs/path/to/notes',
+    _name: 'notes'
+  };
 
   var untildifyStub = sinon.stub();
   untildifyStub.withArgs(config.notebooks.journal.path)
