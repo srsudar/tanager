@@ -195,3 +195,4 @@ similar things:
 * [Inkdrop](https://www.inkdrop.info/)
 * [Boostnote](https://boostnote.io/)
 * [SoyWiki](http://danielchoi.com/software/soywiki.html)
+* [Quiver](http://happenapps.com/#quiver)
