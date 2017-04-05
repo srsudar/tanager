@@ -187,3 +187,11 @@ reside in the root directory of a `tanager` notebook, you could even get the
 best of both worlds--keeping `jrnl` for your short entries, if you like that
 kind of thing, but using `tanager` to manage longer entries.
 
+If `tanager` doesn't meet your needs, here is a list of other tools that do
+similar things:
+
+* [jrnl](http://jrnl.sh/)
+* [Falcon](http://falcon.star-lord.me/)
+* [Inkdrop](https://www.inkdrop.info/)
+* [Boostnote](https://boostnote.io/)
+* [SoyWiki](http://danielchoi.com/software/soywiki.html)
