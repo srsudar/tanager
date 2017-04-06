@@ -196,3 +196,5 @@ similar things:
 * [Boostnote](https://boostnote.io/)
 * [SoyWiki](http://danielchoi.com/software/soywiki.html)
 * [Quiver](http://happenapps.com/#quiver)
+* [Notaional Velocity](http://notational.net/)
+* [nvALT](http://brettterpstra.com/projects/nvalt/)
