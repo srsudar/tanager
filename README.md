@@ -182,7 +182,7 @@ For now the quickest way to understand it is with an example:
 # Shout-outs
 
 `tanager` is inspired by tools like [`jrnl`](http://jrnl.sh/) but does not try
-to replace them. They does different things. If you set your `jrnl` file to
+to replace them. They do different things. If you set your `jrnl` file to
 reside in the root directory of a `tanager` notebook, you could even get the
 best of both worlds--keeping `jrnl` for your short entries, if you like that
 kind of thing, but using `tanager` to manage longer entries.
