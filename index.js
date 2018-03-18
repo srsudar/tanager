@@ -24,7 +24,11 @@ program
   )
   .option(
     '-r, --recent',
-    'Edit the most recently modified file in a notebook'
+    'Edit the most recently modified file in a notebook (same as --last)'
+  )
+  .option(
+    '-l, --last',
+    'Edit the most last modified file in a notebook (same as --recent)'
   )
   .arguments('<words...>')
   .action(function(cliWords) {
@@ -34,7 +38,7 @@ program
 
 core.handleRawInput(
   {
-    editRecent: program.recent,
+    editRecent: program.recent || program.last,
     configFile: program.configFile,
     date: program.date,
     editorCmd: program.editorCmd
