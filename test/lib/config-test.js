@@ -251,27 +251,28 @@ tape('getDefaultConfig returns defaults', function(t) {
   end(t);
 });
 
-tape('getCliConfig returns from cli', function(t) {
+tape('getCliConfig handles custom params', function(t) {
   var cliEditor = 'emacs';
   var expected = {
     editorCmd: cliEditor,
-    editRecent: false
+    editRecent: true,
+    pwd: true,
   };
-  var actual = config.getCliConfig({ editorCmd: cliEditor });
+  var actual = config.getCliConfig({
+    editorCmd: cliEditor,
+    editRecent: true,
+    pwd: true,
+  });
   t.deepEqual(actual, expected);
   end(t);
 });
 
-tape('getCliConfig editRecent is false', function(t) {
-  var expected = { editRecent: false };
+tape('getCliConfig handles defaults', function(t) {
+  var expected = {
+    editRecent: false,
+    pwd: false,
+  };
   var actual = config.getCliConfig({});
-  t.deepEqual(actual, expected);
-  end(t);
-});
-
-tape('getCliConfig editRecent is true', function(t) {
-  var expected = { editRecent: true };
-  var actual = config.getCliConfig({ editRecent: true });
   t.deepEqual(actual, expected);
   end(t);
 });

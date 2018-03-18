@@ -30,6 +30,10 @@ program
     '-l, --last',
     'Edit the most last modified file in a notebook (same as --recent)'
   )
+  .option(
+    '--pwd',
+    'Print the path to the notebook'
+  )
   .arguments('<words...>')
   .action(function(cliWords) {
     words = cliWords;
@@ -39,6 +43,7 @@ program
 core.handleRawInput(
   {
     editRecent: program.recent || program.last,
+    pwd: program.pwd,
     configFile: program.configFile,
     date: program.date,
     editorCmd: program.editorCmd

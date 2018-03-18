@@ -148,6 +148,28 @@ tape('handleValidatedInput calls editLastModifiedFile', function(t) {
   end(t);
 });
 
+tape('handleValidatedInput handles pwd', function(t) {
+  const notebook = 'notebook';
+  const config = { pwd: true };
+  const words = ['bar', 'baz'];
+
+  const getNotebookStub = sinon.stub();
+  getNotebookStub.withArgs(config, words).returns(notebook);
+
+  const printNotebookPathStub = sinon.stub();
+  const editEntryStub = sinon.stub();
+
+  core.getNotebook = getNotebookStub;
+  core.printNotebookPath = printNotebookPathStub;
+  core.editEntry = editEntryStub;
+
+  core.handleValidatedInput(config, null, words);
+
+  t.deepEqual(printNotebookPathStub.args[0], [notebook]);
+  t.equal(editEntryStub.callCount, 0);
+  end(t);
+});
+
 tape('editLastModifiedFile calls fail and rejects if error', function(t) {
   var expected = { err: 'trubs' };
   var getFileStub = sinon.stub().rejects(expected);
