@@ -3,7 +3,7 @@
 var path = require('path');
 var proxyquire = require('proxyquire');
 var sinon = require('sinon');
-var tape = require('tape');
+var test = require('tape');
 require('sinon-as-promised');
 
 var core = require('../../lib/core');
@@ -42,7 +42,7 @@ function createaCliArgs(configPath, date, editorCmd) {
   };
 }
 
-tape('handleRawInput parses given date and calls next', function(t) {
+test('handleRawInput parses given date and calls next', function(t) {
   var path = 'path/to/config';
   var date = new Date('2016-03-05T20:00:00.000Z');
   var dateArg = 'yesterday';
@@ -65,7 +65,7 @@ tape('handleRawInput parses given date and calls next', function(t) {
   end(t);
 });
 
-tape('handleRawInput gets now if no date given', function(t) {
+test('handleRawInput gets now if no date given', function(t) {
   var path = 'path/to/config';
   var date = new Date('2015-03-05T20:00:00.000Z');
   var dateArg = null;
@@ -88,7 +88,7 @@ tape('handleRawInput gets now if no date given', function(t) {
   end(t);
 });
 
-tape('handleRawInput calls fail and quit on err', function(t) {
+test('handleRawInput calls fail and quit on err', function(t) {
   var expected = { err: 'trouble' };
 
   proxyquireCore({
@@ -105,7 +105,7 @@ tape('handleRawInput calls fail and quit on err', function(t) {
   end(t);
 });
 
-tape('handleValidatedInput opens editor', function(t) {
+test('handleValidatedInput opens editor', function(t) {
   var notebook = { path: '/path/to/notebook' };
   var entryPath = path.join(
     notebook.path, '2016', '2016-03-05_lame-meeting.md'
@@ -128,7 +128,7 @@ tape('handleValidatedInput opens editor', function(t) {
   end(t);
 });
 
-tape('handleValidatedInput calls editLastModifiedFile', function(t) {
+test('handleValidatedInput calls editLastModifiedFile', function(t) {
   var notebook = 'notebook';
   var config = { editRecent: true };
   var words = ['foo', 'bar'];
@@ -148,7 +148,7 @@ tape('handleValidatedInput calls editLastModifiedFile', function(t) {
   end(t);
 });
 
-tape('handleValidatedInput handles pwd', function(t) {
+test('handleValidatedInput handles pwd', function(t) {
   const notebook = 'notebook';
   const config = { pwd: true };
   const words = ['bar', 'baz'];
@@ -170,7 +170,7 @@ tape('handleValidatedInput handles pwd', function(t) {
   end(t);
 });
 
-tape('editLastModifiedFile calls fail and rejects if error', function(t) {
+test('editLastModifiedFile calls fail and rejects if error', function(t) {
   var expected = { err: 'trubs' };
   var getFileStub = sinon.stub().rejects(expected);
 
@@ -189,7 +189,7 @@ tape('editLastModifiedFile calls fail and rejects if error', function(t) {
   });
 });
 
-tape('editLastModifiedFile calls editEntry with last file', function(t) {
+test('editLastModifiedFile calls editEntry with last file', function(t) {
   var notebook = { path: '/Users/cersei/cute-joff' };
   var config = { editorCmd: 'word' };  // Cersei seems like a Word user
 
@@ -215,7 +215,7 @@ tape('editLastModifiedFile calls editEntry with last file', function(t) {
   });
 });
 
-tape('editLastModifiedFile does nothing if no files', function(t) {
+test('editLastModifiedFile does nothing if no files', function(t) {
   var getFileStub = sinon.stub().resolves(null);
   var editEntryStub = sinon.stub();
   var failAndQuitStub = sinon.stub();
@@ -241,7 +241,7 @@ tape('editLastModifiedFile does nothing if no files', function(t) {
 
 });
 
-tape('editEntry calls spawn', function(t) {
+test('editEntry calls spawn', function(t) {
   var spawnSpy = sinon.stub();
   proxyquireCore({
     'child_process': {
@@ -260,7 +260,7 @@ tape('editEntry calls spawn', function(t) {
   end(t);
 });
 
-tape('getNotebook gets named notebook', function(t) {
+test('getNotebook gets named notebook', function(t) {
   var notebooks = {
     journal: { path: '/path/j' },
     notes: { path: '/path/n' }
@@ -275,7 +275,7 @@ tape('getNotebook gets named notebook', function(t) {
   end(t);
 });
 
-tape('getNotebook gets default notebook', function(t) {
+test('getNotebook gets default notebook', function(t) {
   var notebooks = {
     journal: { path: '/path/j' },
     notes: { path: '/path/n' },
@@ -297,7 +297,7 @@ tape('getNotebook gets default notebook', function(t) {
   end(t);
 });
 
-tape('getNotebook throws if no default', function(t) {
+test('getNotebook throws if no default', function(t) {
   var notebooks = {
     journal: { path: '/path/j' },
     notes: { path: '/path/n' }
@@ -315,7 +315,7 @@ tape('getNotebook throws if no default', function(t) {
   end(t);
 });
 
-tape('getEntryPath correct when given title', function(t) {
+test('getEntryPath correct when given title', function(t) {
   var notebook = { path: '/path/to/notebook' };
   // TODO: These tests are machine-dependent when it comes to time zone. Going
   // to let this slide for now, but should be fixed.
@@ -339,7 +339,7 @@ tape('getEntryPath correct when given title', function(t) {
   end(t);
 });
 
-tape('getEntryPath correct for no title and default notebook', function(t) {
+test('getEntryPath correct for no title and default notebook', function(t) {
   var notebook = { path: '/path/to/notebook' };
   var date = new Date('2016-12-25T20:00:00.000Z');
   var words = [];
@@ -359,7 +359,7 @@ tape('getEntryPath correct for no title and default notebook', function(t) {
   end(t);
 });
 
-tape('getEntryTitleWords correct for default notebook, no title', function(t) {
+test('getEntryTitleWords correct for default notebook, no title', function(t) {
   var notebook = {
     _name: 'journal',
     default: true
@@ -373,7 +373,7 @@ tape('getEntryTitleWords correct for default notebook, no title', function(t) {
   end(t);
 });
 
-tape('getEntryTitleWords correct for default notebook, title in config',
+test('getEntryTitleWords correct for default notebook, title in config',
     function(t) {
   var notebook = {
     _name: 'journal',
@@ -389,7 +389,7 @@ tape('getEntryTitleWords correct for default notebook, title in config',
   end(t);
 });
 
-tape('getEntryTitleWords correct for default notebook set title', function(t) {
+test('getEntryTitleWords correct for default notebook set title', function(t) {
   var notebook = {
     _name: 'journal',
     default: true
@@ -403,7 +403,7 @@ tape('getEntryTitleWords correct for default notebook set title', function(t) {
   end(t);
 });
 
-tape('getEntryTitleWords correct for custom notebook, no title', function(t) {
+test('getEntryTitleWords correct for custom notebook, no title', function(t) {
   var notebook = {
     _name: 'notes',
     default: false
@@ -417,7 +417,7 @@ tape('getEntryTitleWords correct for custom notebook, no title', function(t) {
   end(t);
 });
 
-tape('getEntryTitleWords correct for custom notebook set title', function(t) {
+test('getEntryTitleWords correct for custom notebook set title', function(t) {
   var notebook = {
     _name: 'journal',
     default: false
@@ -431,7 +431,7 @@ tape('getEntryTitleWords correct for custom notebook set title', function(t) {
   end(t);
 });
 
-tape('getNotebooks resolves paths and adds aliases', function(t) {
+test('getNotebooks resolves paths and adds aliases', function(t) {
   var config = {
     notebooks: {
       journal: {

@@ -2,7 +2,7 @@
 
 var proxyquire = require('proxyquire');
 var sinon = require('sinon');
-var tape = require('tape');
+var test = require('tape');
 require('sinon-as-promised');
 
 var util = require('../../lib/util');
@@ -29,7 +29,7 @@ function end(t) {
   reset();
 }
 
-tape('getLastModifiedFile resolves null if no files', function(t) {
+test('getLastModifiedFile resolves null if no files', function(t) {
   var getFileStub = sinon.stub().resolves([]);
   util.getFilesInDirectory = getFileStub;
   util.getLastModifiedFile('', [])
@@ -43,7 +43,7 @@ tape('getLastModifiedFile resolves null if no files', function(t) {
   });
 });
 
-tape('getLastModifiedFile rejects if a stat promise rejects', function(t) {
+test('getLastModifiedFile rejects if a stat promise rejects', function(t) {
   var statStub = sinon.stub();
   var expected = { err: 'expected failure' };
   statStub.onCall(0).returns(Promise.resolve('foo'));
@@ -67,7 +67,7 @@ tape('getLastModifiedFile rejects if a stat promise rejects', function(t) {
   });
 });
 
-tape('getLastModifiedFile correctly filters based on mtime', function(t) {
+test('getLastModifiedFile correctly filters based on mtime', function(t) {
   var dir = '/Users/jonsnow/emo-journal';
   var suffixes = ['.md', '.txt'];
 
@@ -105,7 +105,7 @@ tape('getLastModifiedFile correctly filters based on mtime', function(t) {
   });
 });
 
-tape('getFilesInDirectory correct pattern for multiple suffix', function(t) {
+test('getFilesInDirectory correct pattern for multiple suffix', function(t) {
   var dir = '/Users/tyrion/scheme-journal';
   var suffixes = ['.md', '.txt'];
   var globStub = sinon.stub().callsArgWith(2, null, []);
@@ -123,7 +123,7 @@ tape('getFilesInDirectory correct pattern for multiple suffix', function(t) {
   });
 });
 
-tape('getFilesInDirectory resolves all files', function(t) {
+test('getFilesInDirectory resolves all files', function(t) {
   // This will also handle the one suffix pattern case
   var dir = '/Users/tyrion/scheme-journal';
   var suffixes = ['.md'];
@@ -145,7 +145,7 @@ tape('getFilesInDirectory resolves all files', function(t) {
   });
 });
 
-tape('getFilesInDirectory rejects if error', function(t) {
+test('getFilesInDirectory rejects if error', function(t) {
   // This will also handle the one suffix pattern case
   var expected = { err: 'so trouble' };
   var globStub = sinon.stub().callsArgWith(2, expected, []);

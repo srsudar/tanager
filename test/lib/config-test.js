@@ -3,7 +3,7 @@
 var merge = require('merge');
 var proxyquire = require('proxyquire');
 var sinon = require('sinon');
-var tape = require('tape');
+var test = require('tape');
 require('sinon-as-promised');
 
 var config = require('../../lib/config');
@@ -46,7 +46,7 @@ function getValidConfig() {
   return cfg;
 }
 
-tape('resolveConfig relies on default', function(t) {
+test('resolveConfig relies on default', function(t) {
   var cliArgs = {
     configFile: '/path/to/config/file',
     editorCmd: 'vim -e'
@@ -92,7 +92,7 @@ tape('resolveConfig relies on default', function(t) {
   end(t);
 });
 
-tape('validateConfig does nothing if all well', function(t) {
+test('validateConfig does nothing if all well', function(t) {
   var cfg = getValidConfig();
 
   var failStub = sinon.stub();
@@ -107,7 +107,7 @@ tape('validateConfig does nothing if all well', function(t) {
   end(t);
 });
 
-tape('validateConfig exits if invalid', function(t) {
+test('validateConfig exits if invalid', function(t) {
   // Start with a valid config and delete things.
   var cfg = {
     editorCmd: 'vim -e',
@@ -153,7 +153,7 @@ tape('validateConfig exits if invalid', function(t) {
   end(t);
 });
 
-tape('expandConfigPaths expands paths', function(t) {
+test('expandConfigPaths expands paths', function(t) {
   var cfg = {
     notebooks: {
       journal: {
@@ -181,14 +181,14 @@ tape('expandConfigPaths expands paths', function(t) {
   end(t);
 });
 
-tape('buildConfig respects nulls', function(t) {
+test('buildConfig respects nulls', function(t) {
   var expected = {};
   var actual = config.buildConfig(undefined);
   t.deepEqual(actual, expected);
   end(t);
 });
 
-tape('buildConfig returns expected', function(t) {
+test('buildConfig returns expected', function(t) {
   var cmd = 'vim -e';
   var expected = { editorCmd: cmd };
   var actual = config.buildConfig(cmd);
@@ -196,7 +196,7 @@ tape('buildConfig returns expected', function(t) {
   end(t);
 });
 
-tape('resolvePriority returns first truthy value', function(t) {
+test('resolvePriority returns first truthy value', function(t) {
   var arr = ['foo', 'bar'];
   t.equal(config.resolvePriority(arr), arr[0]);
 
@@ -206,12 +206,12 @@ tape('resolvePriority returns first truthy value', function(t) {
   end(t);
 });
 
-tape('resolvePriority returns null if no truthy values', function(t) {
+test('resolvePriority returns null if no truthy values', function(t) {
   t.equal(config.resolvePriority([null, undefined, false]), null);
   end(t);
 });
 
-tape('getEditorCmdFromEnv resolves and returns', function(t) {
+test('getEditorCmdFromEnv resolves and returns', function(t) {
   var resolvePriorityStub = sinon.stub().returns();
   config.resolvePriority = resolvePriorityStub;
 
@@ -224,7 +224,7 @@ tape('getEditorCmdFromEnv resolves and returns', function(t) {
   end(t);
 });
 
-tape('getFileConfig resolves path and returns contents', function(t) {
+test('getFileConfig resolves path and returns contents', function(t) {
   var configPath = '~/path/to/config.json';
   var resolvedPath = '/abs/path';
 
@@ -242,7 +242,7 @@ tape('getFileConfig resolves path and returns contents', function(t) {
   end(t);
 });
 
-tape('getDefaultConfig returns defaults', function(t) {
+test('getDefaultConfig returns defaults', function(t) {
   var defaultEditor = 'Marked2';
   config.getEditorCmdFromEnv = sinon.stub().returns(defaultEditor);
   var expected = { editorCmd: defaultEditor };
@@ -251,7 +251,7 @@ tape('getDefaultConfig returns defaults', function(t) {
   end(t);
 });
 
-tape('getCliConfig handles custom params', function(t) {
+test('getCliConfig handles custom params', function(t) {
   var cliEditor = 'emacs';
   var expected = {
     editorCmd: cliEditor,
@@ -267,7 +267,7 @@ tape('getCliConfig handles custom params', function(t) {
   end(t);
 });
 
-tape('getCliConfig handles defaults', function(t) {
+test('getCliConfig handles defaults', function(t) {
   var expected = {
     editRecent: false,
     pwd: false,
