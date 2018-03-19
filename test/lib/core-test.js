@@ -1,6 +1,5 @@
 'use strict';
 
-const path = require('path');
 const proxyquire = require('proxyquire');
 const sinon = require('sinon');
 const test = require('tape');
@@ -105,17 +104,16 @@ test('handleRawInput calls fail and quit on err', function(t) {
   end(t);
 });
 
-test('handleValidatedInput opens editor', function(t) {
+test('handleValidatedInput opens editor for default notebook', function(t) {
   const notebook = {
+    _name: 'lab-notebook',
     path: '/path/to/notebook',
-    template: 'YYYY-MM-DD',
+    template: '<YYYY>/<YYYY-MM-DD>_<title>.md',
   };
-  const entryPath = path.join(
-    notebook.path, '2016', '2016-03-05_lame-meeting.md'
-  );
+  const date = new Date('2016-03-05T20:00:00.000Z');
+  const entryPath = '/path/to/notebook/2016/2016-03-05_lame-meeting.md';
   const words = ['lame', 'meeting'];
   const config = { editorCmd: 'vim -e' };
-  const date = new Date('2016-03-05T20:00:00.000Z');
 
   const mkdirpStub = sinon.stub();
   proxyquireCore({
@@ -127,12 +125,45 @@ test('handleValidatedInput opens editor', function(t) {
   const editStub = sinon.stub();
   core.editEntry = editStub;
 
-  core.getNotebook = sinon.stub().withArgs(config, words).returns(notebook);
+  const getNotebookStub = sinon.stub();
+  getNotebookStub.withArgs(config, words).returns(notebook);
+  core.getNotebook = getNotebookStub;
 
   core.handleValidatedInput(config, date, words);
   t.deepEqual(editStub.args[0], [config.editorCmd, entryPath]);
   t.equal(mkdirpStub.callCount, 1);
-  t.equal(core.getNotebook.callCount, 1);
+  end(t);
+});
+
+test('handleValidatedInput opens editor for specified notebook', function(t) {
+  const notebook = {
+    _name: 'journal',
+    path: '/path/to/notebook',
+    template: '<YYYY>_<title>.md',
+  };
+  const date = new Date('2016-03-05T20:00:00.000Z');
+  const entryPath = '/path/to/notebook/2016_dear-diary.md';
+  // The 0th specifies the name of the notebook.
+  const words = ['journal', 'dear', 'diary'];
+  const config = { editorCmd: 'vim -e' };
+
+  const mkdirpStub = sinon.stub();
+  proxyquireCore({
+    'mkdirp': {
+      sync: mkdirpStub
+    }
+  });
+
+  const editStub = sinon.stub();
+  core.editEntry = editStub;
+
+  const getNotebookStub = sinon.stub();
+  getNotebookStub.withArgs(config, words).returns(notebook);
+  core.getNotebook = getNotebookStub;
+
+  core.handleValidatedInput(config, date, words);
+  t.deepEqual(editStub.args[0], [config.editorCmd, entryPath]);
+  t.equal(mkdirpStub.callCount, 1);
   end(t);
 });
 
@@ -325,7 +356,11 @@ test('getNotebook throws if no default', function(t) {
 });
 
 test('getEntryPath throws if no <title> in template', function(t) {
-  t.fail();
+  const shouldThrow = function() {
+    core.getEntryPath('/dir/', 'bad-template.md');
+  };
+
+  t.throws(shouldThrow, /Entry template must contain/);
   t.end();
 });
 
