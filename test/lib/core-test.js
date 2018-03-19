@@ -106,25 +106,33 @@ test('handleRawInput calls fail and quit on err', function(t) {
 });
 
 test('handleValidatedInput opens editor', function(t) {
-  const notebook = { path: '/path/to/notebook' };
+  const notebook = {
+    path: '/path/to/notebook',
+    template: 'YYYY-MM-DD',
+  };
   const entryPath = path.join(
     notebook.path, '2016', '2016-03-05_lame-meeting.md'
   );
   const words = ['lame', 'meeting'];
   const config = { editorCmd: 'vim -e' };
-  const date = new Date();
+  const date = new Date('2016-03-05T20:00:00.000Z');
+
+  const mkdirpStub = sinon.stub();
+  proxyquireCore({
+    'mkdirp': {
+      sync: mkdirpStub
+    }
+  });
 
   const editStub = sinon.stub();
   core.editEntry = editStub;
 
   core.getNotebook = sinon.stub().withArgs(config, words).returns(notebook);
-  core.getEntryPath = sinon.stub().withArgs(notebook, date, words)
-    .returns(entryPath);
 
   core.handleValidatedInput(config, date, words);
   t.deepEqual(editStub.args[0], [config.editorCmd, entryPath]);
+  t.equal(mkdirpStub.callCount, 1);
   t.equal(core.getNotebook.callCount, 1);
-  t.equal(core.getEntryPath.callCount, 1);
   end(t);
 });
 
@@ -316,120 +324,51 @@ test('getNotebook throws if no default', function(t) {
   end(t);
 });
 
-test('getEntryPath correct when given title', function(t) {
-  const notebook = { path: '/path/to/notebook' };
+test('getEntryPath throws if no <title> in template', function(t) {
+  t.fail();
+  t.end();
+});
+
+test('getEntryPath handles complex parsing', function(t) {
   // TODO: These tests are machine-dependent when it comes to time zone. Going
   // to let this slide for now, but should be fixed.
-  const date = new Date('2016-03-05T20:00:00.000Z');
-  const words = ['meeting', 'with', 'vip'];
+  const date = new Date('2017-12-25T20:00:00.000Z');
 
-  const mkdirpStub = sinon.stub();
-  proxyquireCore({
-    'mkdirp': {
-      sync: mkdirpStub
-    }
-  });
-  
-  const expected = path.join(
-    notebook.path, '2016', '2016-03-05_meeting-with-vip.md'
+  t.equal(
+    core.getEntryPath('/path/to/notebook', '<YYYY>/<YYYY-MM-DD>_<title>.md',
+      'daily', date, []),
+    '/path/to/notebook/2017/2017-12-25_daily.md'
   );
 
-  const actual = core.getEntryPath(notebook, date, words);
-  t.equal(actual, expected);
-  t.deepEqual(mkdirpStub.args[0], [path.join(notebook.path, '2016')]);
-  end(t);
-});
-
-test('getEntryPath correct for no title and default notebook', function(t) {
-  const notebook = { path: '/path/to/notebook' };
-  const date = new Date('2016-12-25T20:00:00.000Z');
-  const words = [];
-  
-  proxyquireCore({
-    'mkdirp': {
-      sync: sinon.stub()
-    }
-  });
-
-  const expected = path.join(
-    notebook.path, '2016', '2016-12-25_daily.md'
+  t.equal(
+    core.getEntryPath('/dir/', '<title>', 'foo', date, ['cat', 'dog']),
+    '/dir/cat-dog'
   );
 
-  const actual = core.getEntryPath(notebook, date, words);
-  t.equal(actual, expected);
-  end(t);
-});
+  t.equal(
+    core.getEntryPath('/dir/', '<title>.txt', 'foo', date, ['cat', 'dog']),
+    '/dir/cat-dog.txt'
+  );
 
-test('getEntryTitleWords correct for default notebook, no title', function(t) {
-  const notebook = {
-    _name: 'journal',
-    default: true
-  };
-  const words = [];
+  t.equal(
+    core.getEntryPath('/dir/', '<YYYY>/<MM>/<YYYY-MM-DD>_<title>.md', 'foo',
+      date, ['cat','dog']),
+    '/dir/2017/12/2017-12-25_cat-dog.md'
+  );
 
-  const expected = core.DEFAULT_NAME_NO_TITLE;
-  const actual = core.getEntryTitleWords(notebook, words);
+  t.equal(
+    core.getEntryPath('/dir/foo/', '<YYYY>/<title>.md', 'every-day', date, []),
+    '/dir/foo/2017/every-day.md'
+  );
 
-  t.equal(actual, expected);
-  end(t);
-});
+  // And some weirder moment.js formatting.
+  t.equal(
+    core.getEntryPath('/dir/bar/', '<dd>/<YYYY><MM><E> <title>.md', 'foo', date,
+      ['this', 'morning']),
+    '/dir/bar/Mo/2017121 this-morning.md'
+  );
 
-test('getEntryTitleWords correct for default notebook, title in config',
-    function(t) {
-  const notebook = {
-    _name: 'journal',
-    default: true,
-    defaultTitle: 'title-son'
-  };
-  const words = [];
-
-  const expected = notebook.defaultTitle;
-  const actual = core.getEntryTitleWords(notebook, words);
-
-  t.equal(actual, expected);
-  end(t);
-});
-
-test('getEntryTitleWords correct for default notebook set title', function(t) {
-  const notebook = {
-    _name: 'journal',
-    default: true
-  };
-  const words = ['meeting', 'with', 'tyrion'];
-
-  const expected = 'meeting-with-tyrion';
-  const actual = core.getEntryTitleWords(notebook, words);
-
-  t.equal(actual, expected);
-  end(t);
-});
-
-test('getEntryTitleWords correct for custom notebook, no title', function(t) {
-  const notebook = {
-    _name: 'notes',
-    default: false
-  };
-  const words = [];
-
-  const expected = core.DEFAULT_NAME_NO_TITLE;
-  const actual = core.getEntryTitleWords(notebook, words);
-
-  t.equal(actual, expected);
-  end(t);
-});
-
-test('getEntryTitleWords correct for custom notebook set title', function(t) {
-  const notebook = {
-    _name: 'journal',
-    default: false
-  };
-  const words = ['notes', 'on', 'winterfell'];
-
-  const expected = 'notes-on-winterfell';
-  const actual = core.getEntryTitleWords(notebook, words);
-
-  t.equal(actual, expected);
-  end(t);
+  t.end();
 });
 
 test('getNotebooks resolves paths and adds aliases', function(t) {

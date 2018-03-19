@@ -168,6 +168,8 @@ For now the quickest way to understand it is with an example:
   "notebooks": {
     "journal": {
       "path": "~/Dropbox/journal/",
+      "template": "<YYYY>/<YYYY-MM-DD>_<title>.md",
+      "defaultTitle": "daily",
       "aliases": ["j", "jl"],
       "default": true
     },
