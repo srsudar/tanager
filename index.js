@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 'use strict';
 
-var program = require('commander');
-var core = require('./lib/core');
+const program = require('commander');
+const core = require('./lib/core');
 
-var words = [];
+let words = [];
 program
   .version(core.VERSION)
   .option(
