@@ -1,12 +1,12 @@
 'use strict';
 
-var merge = require('merge');
-var proxyquire = require('proxyquire');
-var sinon = require('sinon');
-var test = require('tape');
+const merge = require('merge');
+const proxyquire = require('proxyquire');
+const sinon = require('sinon');
+const test = require('tape');
 require('sinon-as-promised');
 
-var config = require('../../lib/config');
+let config = require('../../lib/config');
 
 /**
  * Manipulating the object directly leads to polluting the require cache. Any
@@ -35,7 +35,7 @@ function end(t) {
 }
 
 function getValidConfig() {
-  var cfg = {
+  const cfg = {
     editorCmd: 'vim -e',
     notebooks: {
       journal: {
@@ -47,29 +47,29 @@ function getValidConfig() {
 }
 
 test('resolveConfig relies on default', function(t) {
-  var cliArgs = {
+  const cliArgs = {
     configFile: '/path/to/config/file',
     editorCmd: 'vim -e'
   };
 
-  var defaultConfig = {
+  const defaultConfig = {
     defOnly: 'from default',
     fileRules: 'from default',
     cliRules: 'from default'
   };
 
-  var fileConfig = {
+  const fileConfig = {
     fileOnly: 'from file',
     fileRules: 'from file',
     cliRules: 'from file'
   };
 
-  var cliConfig = {
+  const cliConfig = {
     cliOnly: 'from cli',
     cliRules: 'from cli'
   };
 
-  var expected = {
+  const expected = {
     defOnly: defaultConfig.defOnly,
     fileOnly: fileConfig.fileOnly,
     cliOnly: cliConfig.cliOnly,
@@ -85,7 +85,7 @@ test('resolveConfig relies on default', function(t) {
   config.validateConfig = sinon.stub();
   config.expandConfigPaths = sinon.stub();
 
-  var actual = config.resolveConfig(cliArgs);
+  const actual = config.resolveConfig(cliArgs);
   t.deepEqual(actual, expected);
   t.deepEqual(config.validateConfig.args[0], [actual]);
   t.deepEqual(config.expandConfigPaths.args[0], [actual]);
@@ -93,9 +93,9 @@ test('resolveConfig relies on default', function(t) {
 });
 
 test('validateConfig does nothing if all well', function(t) {
-  var cfg = getValidConfig();
+  const cfg = getValidConfig();
 
-  var failStub = sinon.stub();
+  const failStub = sinon.stub();
   proxyquireConfig({
     './util': {
       failAndQuit: failStub
@@ -109,7 +109,7 @@ test('validateConfig does nothing if all well', function(t) {
 
 test('validateConfig exits if invalid', function(t) {
   // Start with a valid config and delete things.
-  var cfg = {
+  const cfg = {
     editorCmd: 'vim -e',
     notebooks: {
       journal: {
@@ -118,7 +118,7 @@ test('validateConfig exits if invalid', function(t) {
     }
   };
 
-  var failStub = sinon.stub();
+  const failStub = sinon.stub();
   proxyquireConfig({
     './util': {
       failAndQuit: failStub
@@ -126,7 +126,7 @@ test('validateConfig exits if invalid', function(t) {
   });
 
   // We'll use merge to copy things.
-  var noEditor = merge(true, cfg);
+  const noEditor = merge(true, cfg);
   delete(noEditor.editorCmd);
   config.validateConfig(noEditor);
   t.deepEqual(
@@ -134,7 +134,7 @@ test('validateConfig exits if invalid', function(t) {
     [new Error('Could not find editor. Try setting $VISUAL.')]
   );
 
-  var noNotebooks = merge(true, cfg);
+  const noNotebooks = merge(true, cfg);
   delete(noNotebooks.notebooks);
   config.validateConfig(noEditor);
   t.deepEqual(
@@ -142,7 +142,7 @@ test('validateConfig exits if invalid', function(t) {
     [new Error('No notebooks found. Set in .tanager.json')]
   );
 
-  var missingPath = merge(true, cfg);
+  const missingPath = merge(true, cfg);
   delete(missingPath.notebooks.journal.path);
   config.validateConfig(missingPath);
   t.deepEqual(
@@ -154,7 +154,7 @@ test('validateConfig exits if invalid', function(t) {
 });
 
 test('expandConfigPaths expands paths', function(t) {
-  var cfg = {
+  const cfg = {
     notebooks: {
       journal: {
         path: '~/a/b/c'
@@ -165,15 +165,15 @@ test('expandConfigPaths expands paths', function(t) {
     }
   };
 
-  var absJournalPath = '/abs/path/to/a/b/c';
+  const absJournalPath = '/abs/path/to/a/b/c';
 
-  var untildifyStub = sinon.stub();
+  const untildifyStub = sinon.stub();
   untildifyStub.withArgs(cfg.notebooks.journal.path).returns(absJournalPath);
   untildifyStub.withArgs(cfg.notebooks.notes.path)
     .returns(cfg.notebooks.notes.path);
   proxyquireConfig({ 'untildify': untildifyStub });
 
-  var expected = merge(true, cfg);
+  const expected = merge(true, cfg);
   expected.notebooks.journal.path = absJournalPath;
   // we modify cfg in place
   config.expandConfigPaths(cfg);
@@ -182,26 +182,26 @@ test('expandConfigPaths expands paths', function(t) {
 });
 
 test('buildConfig respects nulls', function(t) {
-  var expected = {};
-  var actual = config.buildConfig(undefined);
+  const expected = {};
+  const actual = config.buildConfig(undefined);
   t.deepEqual(actual, expected);
   end(t);
 });
 
 test('buildConfig returns expected', function(t) {
-  var cmd = 'vim -e';
-  var expected = { editorCmd: cmd };
-  var actual = config.buildConfig(cmd);
+  const cmd = 'vim -e';
+  const expected = { editorCmd: cmd };
+  const actual = config.buildConfig(cmd);
   t.deepEqual(actual, expected);
   end(t);
 });
 
 test('resolvePriority returns first truthy value', function(t) {
-  var arr = ['foo', 'bar'];
-  t.equal(config.resolvePriority(arr), arr[0]);
+  const firstTruthy = ['foo', 'bar'];
+  t.equal(config.resolvePriority(firstTruthy), firstTruthy[0]);
 
-  arr = [null, undefined, 'vim -e'];
-  t.equal(config.resolvePriority(arr), arr[2]);
+  const firstFalsey = [null, undefined, 'vim -e'];
+  t.equal(config.resolvePriority(firstFalsey), firstFalsey[2]);
 
   end(t);
 });
@@ -212,7 +212,7 @@ test('resolvePriority returns null if no truthy values', function(t) {
 });
 
 test('getEditorCmdFromEnv resolves and returns', function(t) {
-  var resolvePriorityStub = sinon.stub().returns();
+  const resolvePriorityStub = sinon.stub().returns();
   config.resolvePriority = resolvePriorityStub;
 
   config.getEditorCmdFromEnv();
@@ -225,10 +225,10 @@ test('getEditorCmdFromEnv resolves and returns', function(t) {
 });
 
 test('getFileConfig resolves path and returns contents', function(t) {
-  var configPath = '~/path/to/config.json';
-  var resolvedPath = '/abs/path';
+  const configPath = '~/path/to/config.json';
+  const resolvedPath = '/abs/path';
 
-  var expected = { expected: 'fileContents' };
+  const expected = { expected: 'fileContents' };
 
   proxyquireConfig({
     'untildify': sinon.stub().withArgs(configPath).returns(resolvedPath),
@@ -237,28 +237,28 @@ test('getFileConfig resolves path and returns contents', function(t) {
     }
   });
 
-  var actual = config.getFileConfig(configPath);
+  const actual = config.getFileConfig(configPath);
   t.deepEqual(actual, expected);
   end(t);
 });
 
 test('getDefaultConfig returns defaults', function(t) {
-  var defaultEditor = 'Marked2';
+  const defaultEditor = 'Marked2';
   config.getEditorCmdFromEnv = sinon.stub().returns(defaultEditor);
-  var expected = { editorCmd: defaultEditor };
-  var actual = config.getDefaultConfig();
+  const expected = { editorCmd: defaultEditor };
+  const actual = config.getDefaultConfig();
   t.deepEqual(actual, expected);
   end(t);
 });
 
 test('getCliConfig handles custom params', function(t) {
-  var cliEditor = 'emacs';
-  var expected = {
+  const cliEditor = 'emacs';
+  const expected = {
     editorCmd: cliEditor,
     editRecent: true,
     pwd: true,
   };
-  var actual = config.getCliConfig({
+  const actual = config.getCliConfig({
     editorCmd: cliEditor,
     editRecent: true,
     pwd: true,
@@ -268,11 +268,11 @@ test('getCliConfig handles custom params', function(t) {
 });
 
 test('getCliConfig handles defaults', function(t) {
-  var expected = {
+  const expected = {
     editRecent: false,
     pwd: false,
   };
-  var actual = config.getCliConfig({});
+  const actual = config.getCliConfig({});
   t.deepEqual(actual, expected);
   end(t);
 });

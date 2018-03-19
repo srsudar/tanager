@@ -1,12 +1,12 @@
 'use strict';
 
-var path = require('path');
-var proxyquire = require('proxyquire');
-var sinon = require('sinon');
-var test = require('tape');
+const path = require('path');
+const proxyquire = require('proxyquire');
+const sinon = require('sinon');
+const test = require('tape');
 require('sinon-as-promised');
 
-var core = require('../../lib/core');
+let core = require('../../lib/core');
 
 /**
  * Manipulating the object directly leads to polluting the require cache. Any
@@ -43,14 +43,14 @@ function createaCliArgs(configPath, date, editorCmd) {
 }
 
 test('handleRawInput parses given date and calls next', function(t) {
-  var path = 'path/to/config';
-  var date = new Date('2016-03-05T20:00:00.000Z');
-  var dateArg = 'yesterday';
-  var parseDateStub = sinon.stub().withArgs(dateArg).returns(date);
-  var config = { config: 'much value' };
-  var words = ['foo', 'bar'];
+  const path = 'path/to/config';
+  const date = new Date('2016-03-05T20:00:00.000Z');
+  const dateArg = 'yesterday';
+  const parseDateStub = sinon.stub().withArgs(dateArg).returns(date);
+  const config = { config: 'much value' };
+  const words = ['foo', 'bar'];
 
-  var cliArgs = createaCliArgs(path, date, null);
+  const cliArgs = createaCliArgs(path, date, null);
 
   proxyquireCore({
     'chrono-node': { parseDate: parseDateStub },
@@ -66,13 +66,13 @@ test('handleRawInput parses given date and calls next', function(t) {
 });
 
 test('handleRawInput gets now if no date given', function(t) {
-  var path = 'path/to/config';
-  var date = new Date('2015-03-05T20:00:00.000Z');
-  var dateArg = null;
-  var config = { config: 'much value' };
-  var words = ['foo', 'bar'];
+  const path = 'path/to/config';
+  const date = new Date('2015-03-05T20:00:00.000Z');
+  const dateArg = null;
+  const config = { config: 'much value' };
+  const words = ['foo', 'bar'];
 
-  var cliArgs = createaCliArgs(path, dateArg, null);
+  const cliArgs = createaCliArgs(path, dateArg, null);
 
   proxyquireCore({
     './config': {
@@ -89,7 +89,7 @@ test('handleRawInput gets now if no date given', function(t) {
 });
 
 test('handleRawInput calls fail and quit on err', function(t) {
-  var expected = { err: 'trouble' };
+  const expected = { err: 'trouble' };
 
   proxyquireCore({
     './config': {
@@ -97,7 +97,7 @@ test('handleRawInput calls fail and quit on err', function(t) {
     }
   }, true);
 
-  var shouldThrow = function() {
+  const shouldThrow = function() {
     core.handleRawInput({});
   };
 
@@ -106,15 +106,15 @@ test('handleRawInput calls fail and quit on err', function(t) {
 });
 
 test('handleValidatedInput opens editor', function(t) {
-  var notebook = { path: '/path/to/notebook' };
-  var entryPath = path.join(
+  const notebook = { path: '/path/to/notebook' };
+  const entryPath = path.join(
     notebook.path, '2016', '2016-03-05_lame-meeting.md'
   );
-  var words = ['lame', 'meeting'];
-  var config = { editorCmd: 'vim -e' };
-  var date = new Date();
+  const words = ['lame', 'meeting'];
+  const config = { editorCmd: 'vim -e' };
+  const date = new Date();
 
-  var editStub = sinon.stub();
+  const editStub = sinon.stub();
   core.editEntry = editStub;
 
   core.getNotebook = sinon.stub().withArgs(config, words).returns(notebook);
@@ -129,13 +129,13 @@ test('handleValidatedInput opens editor', function(t) {
 });
 
 test('handleValidatedInput calls editLastModifiedFile', function(t) {
-  var notebook = 'notebook';
-  var config = { editRecent: true };
-  var words = ['foo', 'bar'];
+  const notebook = 'notebook';
+  const config = { editRecent: true };
+  const words = ['foo', 'bar'];
 
-  var getNotebookStub = sinon.stub().withArgs(config, words).returns(notebook);
-  var editLastStub = sinon.stub();
-  var editEntryStub = sinon.stub();
+  const getNotebookStub = sinon.stub().withArgs(config, words).returns(notebook);
+  const editLastStub = sinon.stub();
+  const editEntryStub = sinon.stub();
 
   core.getNotebook = getNotebookStub;
   core.editLastModifiedFile = editLastStub;
@@ -171,8 +171,8 @@ test('handleValidatedInput handles pwd', function(t) {
 });
 
 test('editLastModifiedFile calls fail and rejects if error', function(t) {
-  var expected = { err: 'trubs' };
-  var getFileStub = sinon.stub().rejects(expected);
+  const expected = { err: 'trubs' };
+  const getFileStub = sinon.stub().rejects(expected);
 
   proxyquireCore({ './util':
     { getLastModifiedFile: getFileStub }
@@ -190,14 +190,14 @@ test('editLastModifiedFile calls fail and rejects if error', function(t) {
 });
 
 test('editLastModifiedFile calls editEntry with last file', function(t) {
-  var notebook = { path: '/Users/cersei/cute-joff' };
-  var config = { editorCmd: 'word' };  // Cersei seems like a Word user
+  const notebook = { path: '/Users/cersei/cute-joff' };
+  const config = { editorCmd: 'word' };  // Cersei seems like a Word user
 
-  var entryPath = '/Users/cersei/cute-joff/ten-years-later-first-entry.md';
+  const entryPath = '/Users/cersei/cute-joff/ten-years-later-first-entry.md';
 
-  var getFileStub = sinon.stub().withArgs(notebook.path, ['.md'])
+  const getFileStub = sinon.stub().withArgs(notebook.path, ['.md'])
     .resolves(entryPath);
-  var editEntryStub = sinon.stub();
+  const editEntryStub = sinon.stub();
 
   proxyquireCore({ './util':
     { getLastModifiedFile: getFileStub }
@@ -216,9 +216,9 @@ test('editLastModifiedFile calls editEntry with last file', function(t) {
 });
 
 test('editLastModifiedFile does nothing if no files', function(t) {
-  var getFileStub = sinon.stub().resolves(null);
-  var editEntryStub = sinon.stub();
-  var failAndQuitStub = sinon.stub();
+  const getFileStub = sinon.stub().resolves(null);
+  const editEntryStub = sinon.stub();
+  const failAndQuitStub = sinon.stub();
 
   proxyquireCore({ './util':
     {
@@ -242,15 +242,15 @@ test('editLastModifiedFile does nothing if no files', function(t) {
 });
 
 test('editEntry calls spawn', function(t) {
-  var spawnSpy = sinon.stub();
+  const spawnSpy = sinon.stub();
   proxyquireCore({
     'child_process': {
       spawn: spawnSpy
     }
   });
 
-  var editorCmd = 'MacDown';
-  var entryPath = '/path/to/file.md';
+  const editorCmd = 'MacDown';
+  const entryPath = '/path/to/file.md';
 
   core.editEntry(editorCmd, entryPath);
   t.deepEqual(
@@ -261,22 +261,22 @@ test('editEntry calls spawn', function(t) {
 });
 
 test('getNotebook gets named notebook', function(t) {
-  var notebooks = {
+  const notebooks = {
     journal: { path: '/path/j' },
     notes: { path: '/path/n' }
   };
-  var expected = notebooks.journal;
+  const expected = notebooks.journal;
 
-  var config = { notebooks: notebooks };
+  const config = { notebooks: notebooks };
   core.getNotebooks = sinon.stub().withArgs(config).returns(notebooks);
 
-  var actual = core.getNotebook(config, ['journal']);
+  const actual = core.getNotebook(config, ['journal']);
   t.deepEqual(actual, expected);
   end(t);
 });
 
 test('getNotebook gets default notebook', function(t) {
-  var notebooks = {
+  const notebooks = {
     journal: { path: '/path/j' },
     notes: { path: '/path/n' },
     mostUsed: {
@@ -284,30 +284,31 @@ test('getNotebook gets default notebook', function(t) {
       default: true
     }
   };
-  var expected = notebooks.mostUsed;
-  var config = { notebooks: notebooks };
+  const expected = notebooks.mostUsed;
+  const config = { notebooks: notebooks };
   core.getNotebooks = sinon.stub().withArgs(config).returns(notebooks);
 
-  var actual = core.getNotebook(config, ['what', 'a', 'great', 'day']);
-  t.deepEqual(actual, expected);
+  const actualWithWords =
+    core.getNotebook(config, ['what', 'a', 'great', 'day']);
+  t.deepEqual(actualWithWords, expected);
 
-  actual = core.getNotebook(config, []);
-  t.deepEqual(actual, expected);
+  const actualNoWords = core.getNotebook(config, []);
+  t.deepEqual(actualNoWords, expected);
 
   end(t);
 });
 
 test('getNotebook throws if no default', function(t) {
-  var notebooks = {
+  const notebooks = {
     journal: { path: '/path/j' },
     notes: { path: '/path/n' }
   };
 
-  var config = { notebooks: notebooks };
+  const config = { notebooks: notebooks };
   core.getNotebooks = sinon.stub().withArgs(config).returns(notebooks);
-  var expected = new Error('Cannot find notebook. Check name or set default.');
+  const expected = new Error('Cannot find notebook. Check name or set default.');
 
-  var shouldThrow = function() {
+  const shouldThrow = function() {
     core.getNotebook(config, []);
   };
 
@@ -316,33 +317,33 @@ test('getNotebook throws if no default', function(t) {
 });
 
 test('getEntryPath correct when given title', function(t) {
-  var notebook = { path: '/path/to/notebook' };
+  const notebook = { path: '/path/to/notebook' };
   // TODO: These tests are machine-dependent when it comes to time zone. Going
   // to let this slide for now, but should be fixed.
-  var date = new Date('2016-03-05T20:00:00.000Z');
-  var words = ['meeting', 'with', 'vip'];
+  const date = new Date('2016-03-05T20:00:00.000Z');
+  const words = ['meeting', 'with', 'vip'];
 
-  var mkdirpStub = sinon.stub();
+  const mkdirpStub = sinon.stub();
   proxyquireCore({
     'mkdirp': {
       sync: mkdirpStub
     }
   });
   
-  var expected = path.join(
+  const expected = path.join(
     notebook.path, '2016', '2016-03-05_meeting-with-vip.md'
   );
 
-  var actual = core.getEntryPath(notebook, date, words);
+  const actual = core.getEntryPath(notebook, date, words);
   t.equal(actual, expected);
   t.deepEqual(mkdirpStub.args[0], [path.join(notebook.path, '2016')]);
   end(t);
 });
 
 test('getEntryPath correct for no title and default notebook', function(t) {
-  var notebook = { path: '/path/to/notebook' };
-  var date = new Date('2016-12-25T20:00:00.000Z');
-  var words = [];
+  const notebook = { path: '/path/to/notebook' };
+  const date = new Date('2016-12-25T20:00:00.000Z');
+  const words = [];
   
   proxyquireCore({
     'mkdirp': {
@@ -350,24 +351,24 @@ test('getEntryPath correct for no title and default notebook', function(t) {
     }
   });
 
-  var expected = path.join(
+  const expected = path.join(
     notebook.path, '2016', '2016-12-25_daily.md'
   );
 
-  var actual = core.getEntryPath(notebook, date, words);
+  const actual = core.getEntryPath(notebook, date, words);
   t.equal(actual, expected);
   end(t);
 });
 
 test('getEntryTitleWords correct for default notebook, no title', function(t) {
-  var notebook = {
+  const notebook = {
     _name: 'journal',
     default: true
   };
-  var words = [];
+  const words = [];
 
-  var expected = core.DEFAULT_NAME_NO_TITLE;
-  var actual = core.getEntryTitleWords(notebook, words);
+  const expected = core.DEFAULT_NAME_NO_TITLE;
+  const actual = core.getEntryTitleWords(notebook, words);
 
   t.equal(actual, expected);
   end(t);
@@ -375,64 +376,64 @@ test('getEntryTitleWords correct for default notebook, no title', function(t) {
 
 test('getEntryTitleWords correct for default notebook, title in config',
     function(t) {
-  var notebook = {
+  const notebook = {
     _name: 'journal',
     default: true,
     defaultTitle: 'title-son'
   };
-  var words = [];
+  const words = [];
 
-  var expected = notebook.defaultTitle;
-  var actual = core.getEntryTitleWords(notebook, words);
+  const expected = notebook.defaultTitle;
+  const actual = core.getEntryTitleWords(notebook, words);
 
   t.equal(actual, expected);
   end(t);
 });
 
 test('getEntryTitleWords correct for default notebook set title', function(t) {
-  var notebook = {
+  const notebook = {
     _name: 'journal',
     default: true
   };
-  var words = ['meeting', 'with', 'tyrion'];
+  const words = ['meeting', 'with', 'tyrion'];
 
-  var expected = 'meeting-with-tyrion';
-  var actual = core.getEntryTitleWords(notebook, words);
+  const expected = 'meeting-with-tyrion';
+  const actual = core.getEntryTitleWords(notebook, words);
 
   t.equal(actual, expected);
   end(t);
 });
 
 test('getEntryTitleWords correct for custom notebook, no title', function(t) {
-  var notebook = {
+  const notebook = {
     _name: 'notes',
     default: false
   };
-  var words = [];
+  const words = [];
 
-  var expected = core.DEFAULT_NAME_NO_TITLE;
-  var actual = core.getEntryTitleWords(notebook, words);
+  const expected = core.DEFAULT_NAME_NO_TITLE;
+  const actual = core.getEntryTitleWords(notebook, words);
 
   t.equal(actual, expected);
   end(t);
 });
 
 test('getEntryTitleWords correct for custom notebook set title', function(t) {
-  var notebook = {
+  const notebook = {
     _name: 'journal',
     default: false
   };
-  var words = ['notes', 'on', 'winterfell'];
+  const words = ['notes', 'on', 'winterfell'];
 
-  var expected = 'notes-on-winterfell';
-  var actual = core.getEntryTitleWords(notebook, words);
+  const expected = 'notes-on-winterfell';
+  const actual = core.getEntryTitleWords(notebook, words);
 
   t.equal(actual, expected);
   end(t);
 });
 
 test('getNotebooks resolves paths and adds aliases', function(t) {
-  var config = {
+  const config = {
     notebooks: {
       journal: {
         path: '~/path/to/journal',
@@ -446,19 +447,19 @@ test('getNotebooks resolves paths and adds aliases', function(t) {
     }
   };
 
-  var expectedJournal = {
+  const expectedJournal = {
     path: '/abs/path/to/journal',
     aliases: config.notebooks.journal.aliases,
     otherVal: config.notebooks.journal.otherVal,
     default: config.notebooks.journal.default,
     _name: 'journal'
   };
-  var expectedNotes = {
+  const expectedNotes = {
     path: '/abs/path/to/notes',
     _name: 'notes'
   };
 
-  var untildifyStub = sinon.stub();
+  const untildifyStub = sinon.stub();
   untildifyStub.withArgs(config.notebooks.journal.path)
     .returns(expectedJournal.path);
   untildifyStub.withArgs(config.notebooks.notes.path)
@@ -466,14 +467,14 @@ test('getNotebooks resolves paths and adds aliases', function(t) {
 
   proxyquireCore({ 'untildify': untildifyStub });
 
-  var expected = {
+  const expected = {
     journal: expectedJournal,
     j: expectedJournal,
     jrnl: expectedJournal,
     notes: expectedNotes
   };
 
-  var actual = core.getNotebooks(config);
+  const actual = core.getNotebooks(config);
 
   t.deepEqual(actual, expected);
   end(t);

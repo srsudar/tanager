@@ -1,11 +1,11 @@
 'use strict';
 
-var proxyquire = require('proxyquire');
-var sinon = require('sinon');
-var test = require('tape');
+const proxyquire = require('proxyquire');
+const sinon = require('sinon');
+const test = require('tape');
 require('sinon-as-promised');
 
-var util = require('../../lib/util');
+let util = require('../../lib/util');
 
 /**
  * Manipulating the object directly leads to polluting the require cache. Any
@@ -30,7 +30,7 @@ function end(t) {
 }
 
 test('getLastModifiedFile resolves null if no files', function(t) {
-  var getFileStub = sinon.stub().resolves([]);
+  const getFileStub = sinon.stub().resolves([]);
   util.getFilesInDirectory = getFileStub;
   util.getLastModifiedFile('', [])
   .then(actual => {
@@ -44,14 +44,14 @@ test('getLastModifiedFile resolves null if no files', function(t) {
 });
 
 test('getLastModifiedFile rejects if a stat promise rejects', function(t) {
-  var statStub = sinon.stub();
-  var expected = { err: 'expected failure' };
+  const statStub = sinon.stub();
+  const expected = { err: 'expected failure' };
   statStub.onCall(0).returns(Promise.resolve('foo'));
   statStub.onCall(1).returns(Promise.reject(expected));
   statStub.onCall(2).returns(Promise.resolve('bar'));
 
-  var files = ['a', 'b', 'c'];
-  var getFilesInDirectoryStub = sinon.stub().resolves(files);
+  const files = ['a', 'b', 'c'];
+  const getFilesInDirectoryStub = sinon.stub().resolves(files);
 
   util.getFilesInDirectory = getFilesInDirectoryStub;
   util.statPromisified = statStub;
@@ -68,24 +68,24 @@ test('getLastModifiedFile rejects if a stat promise rejects', function(t) {
 });
 
 test('getLastModifiedFile correctly filters based on mtime', function(t) {
-  var dir = '/Users/jonsnow/emo-journal';
-  var suffixes = ['.md', '.txt'];
+  const dir = '/Users/jonsnow/emo-journal';
+  const suffixes = ['.md', '.txt'];
 
-  var files = ['foo.md', 'bar.md', 'cat.md'];
+  const files = ['foo.md', 'bar.md', 'cat.md'];
   // We want bar.md to be the most recent.
-  var expected = files[1];
+  const expected = files[1];
   // We can compare these using < >, so we'll use ints for simplicity here.
-  var fooStats = {
+  const fooStats = {
     mtime: 100
   };
-  var barStats = {
+  const barStats = {
     mtime: 500
   };
-  var catStats = {
+  const catStats = {
     mtime: 250
   };
 
-  var statStub = sinon.stub();
+  const statStub = sinon.stub();
   statStub.withArgs(files[0]).returns(Promise.resolve(fooStats));
   statStub.withArgs(files[1]).returns(Promise.resolve(barStats));
   statStub.withArgs(files[2]).returns(Promise.resolve(catStats));
@@ -106,14 +106,14 @@ test('getLastModifiedFile correctly filters based on mtime', function(t) {
 });
 
 test('getFilesInDirectory correct pattern for multiple suffix', function(t) {
-  var dir = '/Users/tyrion/scheme-journal';
-  var suffixes = ['.md', '.txt'];
-  var globStub = sinon.stub().callsArgWith(2, null, []);
+  const dir = '/Users/tyrion/scheme-journal';
+  const suffixes = ['.md', '.txt'];
+  const globStub = sinon.stub().callsArgWith(2, null, []);
   proxyquireUtil({ 'glob': globStub });
 
   util.getFilesInDirectory(dir, suffixes)
   .then(() => {
-    var globArgs = globStub.args[0];
+    const globArgs = globStub.args[0];
     t.equal(globArgs[0], '**/*{.md,.txt}');
     end(t);
   })
@@ -125,16 +125,16 @@ test('getFilesInDirectory correct pattern for multiple suffix', function(t) {
 
 test('getFilesInDirectory resolves all files', function(t) {
   // This will also handle the one suffix pattern case
-  var dir = '/Users/tyrion/scheme-journal';
-  var suffixes = ['.md'];
-  var expected = ['foo.md', 'my-secret-journal.md'];
-  var globStub = sinon.stub().callsArgWith(2, null, expected);
+  const dir = '/Users/tyrion/scheme-journal';
+  const suffixes = ['.md'];
+  const expected = ['foo.md', 'my-secret-journal.md'];
+  const globStub = sinon.stub().callsArgWith(2, null, expected);
   proxyquireUtil({ 'glob': globStub });
 
   util.getFilesInDirectory(dir, suffixes)
   .then(actual => {
     t.equal(actual, expected);
-    var globArgs = globStub.args[0];
+    const globArgs = globStub.args[0];
     t.equal(globArgs[0], '**/*.md');
     t.deepEqual(globArgs[1], { cwd: dir, absolute: true });
     end(t);
@@ -147,8 +147,8 @@ test('getFilesInDirectory resolves all files', function(t) {
 
 test('getFilesInDirectory rejects if error', function(t) {
   // This will also handle the one suffix pattern case
-  var expected = { err: 'so trouble' };
-  var globStub = sinon.stub().callsArgWith(2, expected, []);
+  const expected = { err: 'so trouble' };
+  const globStub = sinon.stub().callsArgWith(2, expected, []);
   proxyquireUtil({ 'glob': globStub });
 
   util.getFilesInDirectory('', [])
