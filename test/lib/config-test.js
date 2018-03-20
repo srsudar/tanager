@@ -55,13 +55,16 @@ test('resolveConfig relies on default', function(t) {
   const defaultConfig = {
     defOnly: 'from default',
     fileRules: 'from default',
-    cliRules: 'from default'
+    cliRules: 'from default',
+    template: 'default template',
+    defaultTitle: 'default title',
   };
 
   const fileConfig = {
     fileOnly: 'from file',
     fileRules: 'from file',
-    cliRules: 'from file'
+    cliRules: 'from file',
+    template: 'template from file',
   };
 
   const cliConfig = {
@@ -74,7 +77,9 @@ test('resolveConfig relies on default', function(t) {
     fileOnly: fileConfig.fileOnly,
     cliOnly: cliConfig.cliOnly,
     fileRules: fileConfig.fileRules,
-    cliRules: cliConfig.cliRules
+    cliRules: cliConfig.cliRules,
+    template: fileConfig.template,
+    defaultTitle: defaultConfig.defaultTitle,
   };
 
   config.getDefaultConfig = sinon.stub().returns(defaultConfig);
@@ -181,7 +186,7 @@ test('expandConfigPaths expands paths', function(t) {
   end(t);
 });
 
-test('buildConfig respects nulls', function(t) {
+test('buildConfig respects missing args', function(t) {
   const expected = {};
   const actual = config.buildConfig(undefined);
   t.deepEqual(actual, expected);
@@ -230,10 +235,15 @@ test('getFileConfig resolves path and returns contents', function(t) {
 
   const expected = { expected: 'fileContents' };
 
+  const untildifyStub = sinon.stub();
+  untildifyStub.withArgs(configPath).returns(resolvedPath);
+  const readFileSyncStub = sinon.stub();
+  readFileSyncStub.withArgs(resolvedPath).returns(expected);
+
   proxyquireConfig({
-    'untildify': sinon.stub().withArgs(configPath).returns(resolvedPath),
+    'untildify': untildifyStub,
     'jsonfile': {
-      'readFileSync': sinon.stub().withArgs(resolvedPath).returns(expected)
+      'readFileSync': readFileSyncStub,
     }
   });
 
@@ -245,7 +255,9 @@ test('getFileConfig resolves path and returns contents', function(t) {
 test('getDefaultConfig returns defaults', function(t) {
   const defaultEditor = 'Marked2';
   config.getEditorCmdFromEnv = sinon.stub().returns(defaultEditor);
-  const expected = { editorCmd: defaultEditor };
+  const expected = {
+    editorCmd: defaultEditor,
+  };
   const actual = config.getDefaultConfig();
   t.deepEqual(actual, expected);
   end(t);
