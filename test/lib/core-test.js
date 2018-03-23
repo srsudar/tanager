@@ -45,16 +45,19 @@ test('handleRawInput parses given date and calls next', function(t) {
   const path = 'path/to/config';
   const date = new Date('2016-03-05T20:00:00.000Z');
   const dateArg = 'yesterday';
-  const parseDateStub = sinon.stub().withArgs(dateArg).returns(date);
+  const parseDateStub = sinon.stub();
+  parseDateStub.withArgs(dateArg).returns(date);
   const config = { config: 'much value' };
   const words = ['foo', 'bar'];
 
-  const cliArgs = createaCliArgs(path, date, null);
+  const cliArgs = createaCliArgs(path, dateArg, null);
+  const resolveConfigStub = sinon.stub();
+  resolveConfigStub.withArgs(cliArgs).returns(config);
 
   proxyquireCore({
     'chrono-node': { parseDate: parseDateStub },
     './config': {
-      resolveConfig: sinon.stub().withArgs(cliArgs).returns(config)
+      resolveConfig: resolveConfigStub,
     }
   }, true);
   core.handleValidatedInput = sinon.stub();
@@ -72,13 +75,16 @@ test('handleRawInput gets now if no date given', function(t) {
   const words = ['foo', 'bar'];
 
   const cliArgs = createaCliArgs(path, dateArg, null);
+  const resolveConfigStub = sinon.stub();
+  resolveConfigStub.withArgs(cliArgs).returns(config);
 
   proxyquireCore({
     './config': {
-      resolveConfig: sinon.stub().withArgs(cliArgs).returns(config)
+      resolveConfig: resolveConfigStub,
     }
   }, true);
-  core.getConfig = sinon.stub().withArgs(path).resolves(config);
+  core.getConfig = sinon.stub();
+  core.getConfig.withArgs(path).resolves(config);
   core.handleValidatedInput = sinon.stub();
   core.getNow = sinon.stub().returns(date);
 
@@ -346,7 +352,8 @@ test('getNotebook gets named notebook', function(t) {
   const expected = notebooks.journal;
 
   const config = { notebooks: notebooks };
-  core.getNotebooks = sinon.stub().withArgs(config).returns(notebooks);
+  core.getNotebooks = sinon.stub();
+  core.getNotebooks.withArgs(config).returns(notebooks);
 
   const actual = core.getNotebook(config, ['journal']);
   t.deepEqual(actual, expected);
@@ -364,7 +371,8 @@ test('getNotebook gets default notebook', function(t) {
   };
   const expected = notebooks.mostUsed;
   const config = { notebooks: notebooks };
-  core.getNotebooks = sinon.stub().withArgs(config).returns(notebooks);
+  core.getNotebooks = sinon.stub();
+  core.getNotebooks.withArgs(config).returns(notebooks);
 
   const actualWithWords =
     core.getNotebook(config, ['what', 'a', 'great', 'day']);
@@ -383,7 +391,8 @@ test('getNotebook throws if no default', function(t) {
   };
 
   const config = { notebooks: notebooks };
-  core.getNotebooks = sinon.stub().withArgs(config).returns(notebooks);
+  core.getNotebooks = sinon.stub();
+  core.getNotebooks.withArgs(config).returns(notebooks);
   const expected = new Error('Cannot find notebook. Check name or set default.');
 
   const shouldThrow = function() {

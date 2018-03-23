@@ -90,8 +90,8 @@ test('getLastModifiedFile correctly filters based on mtime', function(t) {
   statStub.withArgs(files[1]).returns(Promise.resolve(barStats));
   statStub.withArgs(files[2]).returns(Promise.resolve(catStats));
 
-  util.getFilesInDirectory = sinon.stub().withArgs(dir, suffixes)
-    .resolves(files);
+  util.getFilesInDirectory = sinon.stub();
+  util.getFilesInDirectory.withArgs(dir, suffixes).resolves(files);
   util.statPromisified = statStub;
 
   util.getLastModifiedFile(dir, suffixes)

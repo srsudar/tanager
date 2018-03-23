@@ -83,9 +83,10 @@ test('resolveConfig relies on default', function(t) {
   };
 
   config.getDefaultConfig = sinon.stub().returns(defaultConfig);
-  config.getFileConfig = sinon.stub().withArgs(cliArgs.configFile)
-    .returns(fileConfig);
-  config.getCliConfig = sinon.stub().withArgs(cliArgs).returns(cliConfig);
+  config.getFileConfig = sinon.stub();
+  config.getFileConfig.withArgs(cliArgs.configFile).returns(fileConfig);
+  config.getCliConfig = sinon.stub();
+  config.getCliConfig.withArgs(cliArgs).returns(cliConfig);
 
   config.validateConfig = sinon.stub();
   config.expandConfigPaths = sinon.stub();
