@@ -11,7 +11,8 @@
 `tanager` is a notebook manager. It helps you organize files for writing. Use
 it to organize your journals and notes. It does not impose any structure on
 these files, but it is opinionated about where the files are stored and how
-they are named.
+they are named. If you don't like those opinions, you can customize it to do
+what you want.
 
 If you like to maintain notes in flat files and spend a lot of time navigating
 to the correct directories or abiding by your own naming conventions, `tanager`
