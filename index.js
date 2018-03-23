@@ -28,7 +28,7 @@ program
   )
   .option(
     '-l, --last',
-    'Edit the most last modified file in a notebook (same as --recent)'
+    'Edit the last modified file in a notebook (same as --recent)'
   )
   .option(
     '--pwd',

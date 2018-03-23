@@ -71,8 +71,8 @@ start writing notes in your `notes` notebook:
 tanager notes meeting with vip
 ```
 
-If the day is March 9, 2017, this will open your editor with a file called:
-`2017-03-09_meeting-with-vip.md`. You can then begin editing.
+If the day is March 9, 2017, this will by default open your editor with a file
+called: `2017-03-09_meeting-with-vip.md`. You can then begin editing.
 
 If you also have a notebook called `journal`, you can instead type:
 
@@ -80,8 +80,12 @@ If you also have a notebook called `journal`, you can instead type:
 tanager journal day one in peru
 ```
 
-This will open a file named `2017-03-09_day-one-in-peru.md`, but will be in
-your `journal` notebook (i.e. saved in a different directory).
+By default this will open a file named `2017-03-09_day-one-in-peru.md`, but will
+be in your `journal` notebook (i.e. saved in a different directory).
+
+By default these files will be in your notebook saved in a directory for the
+year--`2017` in the examples above. See the [Configuration](#configuration)
+section for more information on customizing the paths.
 
 
 ## Specifying a Date Other Than Today
@@ -101,9 +105,9 @@ editor to `2017-03-08_leaving-for-lichtenstein.md`.
 
 ## Editing Last Modified File
 
-The `-r`/`--recent` flag will begin editing the most recently modified file in
-a given notebook, allowing you to repeatedly update an entry over the course of
-a day or jump back in after a restart.
+The `-r`/`--recent` and `-l`/`--last` flags will begin editing the most recently
+modified file in a given notebook, allowing you to repeatedly update an entry
+over the course of a day or jump back in after a restart.
 
 ## Full Output of `tanager --help`
 
@@ -121,7 +125,10 @@ a day or jump back in after a restart.
     -e, --editor-cmd <editor-cmd>    Editor used to edit. Defaults to
                                        config.editor, $VISUAL, then $EDITOR
     -r, --recent                     Edit the most recently modified file in
-                                       a notebook
+                                       a notebook (same as --last)
+    -l, --last                       Edit the last modified file in a notebook
+                                       (same as --recent)
+    --pwd                            Print the path to the notebook
 ```
 
 
@@ -157,8 +164,8 @@ Some things to notice:
 # Configuration
 
 Config information lives in `~/.tanager.json`. It should have at a minimum a
-`notebooks` object, where each key is a notebook name and points to an object
-that includes a `path` property. A key `default: true` indicates that this is
+`notebooks` object, where each property is a notebook name and points to an
+object that includes a `path` property. `default: true` indicates that this is
 the notebook that should be used if no name is specified.
 
 For now the quickest way to understand it is with an example:
@@ -179,6 +186,30 @@ For now the quickest way to understand it is with an example:
   }
 }
 ```
+
+Note the `template` and `defaultTitle` keys.
+
+The `template` key allows you to organize your files within a notebook. The
+strings in angled brackets (except for the special case `<title>`) are passed to
+the [moment.js format function](https://momentjs.com/docs/#/displaying/). In the
+example above, the template says that for March 19, 2018, invoking `tanager`
+would open the file:
+
+```shell
+~/Dropbox/journal/2018/2018-03-19_daily.md
+```
+
+If you do not specify a title, the property `defaultTitle` is used. If you do
+not specify `defaultTitle`, the default `daily` is used. If you do not specify a
+template, the default template is `<YYYY>/<YYYY-MM-DD>_<title>.md`.
+
+If you want your files saved by year and month, you could set template to be:
+
+```shell
+<YYYY>/<MM>/<YYYY-MM-DD>_<title>.md
+```
+
+If a template is specified, it must include `<title>`.
 
 
 # Shout-outs
