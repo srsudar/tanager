@@ -1,6 +1,6 @@
 {
   "name": "tanager",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Start writing quickly. Helps you maintain notes and journals as standalone, organized files.",
   "main": "index.js",
   "scripts": {
