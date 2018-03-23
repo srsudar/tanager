@@ -207,7 +207,8 @@ test('handleValidatedInput calls editLastModifiedFile', function(t) {
   const config = { editRecent: true };
   const words = ['foo', 'bar'];
 
-  const getNotebookStub = sinon.stub().withArgs(config, words).returns(notebook);
+  const getNotebookStub = sinon.stub();
+  getNotebookStub.withArgs(config, words).returns(notebook);
   const editLastStub = sinon.stub();
   const editEntryStub = sinon.stub();
 
@@ -264,13 +265,16 @@ test('editLastModifiedFile calls fail and rejects if error', function(t) {
 });
 
 test('editLastModifiedFile calls editEntry with last file', function(t) {
-  const notebook = { path: '/Users/cersei/cute-joff' };
+  const notebook = {
+    path: '/Users/cersei/cute-joff',
+    template: 'foo.docx',
+  };
   const config = { editorCmd: 'word' };  // Cersei seems like a Word user
 
-  const entryPath = '/Users/cersei/cute-joff/ten-years-later-first-entry.md';
+  const entryPath = '/Users/cersei/cute-joff/ten-years-later-first-entry.docx';
 
-  const getFileStub = sinon.stub().withArgs(notebook.path, ['.md'])
-    .resolves(entryPath);
+  const getFileStub = sinon.stub();
+  getFileStub.withArgs(notebook.path, ['.docx']).resolves(entryPath);
   const editEntryStub = sinon.stub();
 
   proxyquireCore({ './util':
@@ -486,5 +490,19 @@ test('getNotebooks resolves paths and adds aliases', function(t) {
   const actual = core.getNotebooks(config);
 
   t.deepEqual(actual, expected);
+  end(t);
+});
+
+test('getFileSuffixForNotebook returns from template', function(t) {
+  const notebook = {
+    template: '<YYYY>_<title>.txt',
+  };
+
+  t.equal(core.getFileSuffixForNotebook(notebook), '.txt');
+  end(t);
+});
+
+test('getFileSuffixForNotebook returns default', function(t) {
+  t.equal(core.getFileSuffixForNotebook({}), '.md');
   end(t);
 });
