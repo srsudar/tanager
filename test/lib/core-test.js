@@ -175,6 +175,40 @@ test('handleValidatedInput opens editor for specified notebook', function(t) {
   end(t);
 });
 
+test('handleValidatedInput opens editor for specified alias', function(t) {
+  const notebook = {
+    _name: 'journal',
+    path: '/path/to/notebook',
+    template: '<YYYY>_<title>.md',
+    aliases: [ 'j', 'jrnl' ],
+  };
+  const date = new Date('2016-03-05T20:00:00.000Z');
+  const entryPath = '/path/to/notebook/2016_dear-diary.md';
+  // The 0th is an alias for the notebook
+  const words = ['jrnl', 'dear', 'diary'];
+  const config = { editorCmd: 'vim -e' };
+
+  const mkdirpStub = sinon.stub();
+  proxyquireCore({
+    'mkdirp': {
+      sync: mkdirpStub
+    }
+  });
+
+  const editStub = sinon.stub();
+  core.editEntry = editStub;
+
+  const getNotebookStub = sinon.stub();
+  getNotebookStub.withArgs(config, words).returns(notebook);
+  core.getNotebook = getNotebookStub;
+
+  core.handleValidatedInput(config, date, words);
+  t.deepEqual(editStub.args[0], [config.editorCmd, entryPath]);
+  t.equal(mkdirpStub.callCount, 1);
+  t.deepEqual(mkdirpStub.args[0], ['/path/to/notebook']);
+  end(t);
+});
+
 test('handleValidatedInput handles all defaults', function(t) {
   const notebook = {
     _name: 'lab-notebook',
